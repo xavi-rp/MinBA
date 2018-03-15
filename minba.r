@@ -98,7 +98,7 @@ if(tolower(mskng) != "no"){
 
 #### Modelling per each species ####
 #specs <- unique(presences$sp2)
-specs <- unique(presences$sp2)[10:13]
+specs <- unique(presences$sp2)[1:4]
 
 for(sps in specs){
   pres <- presences[presences$sp2 %in% sps, ] # selecting for species
@@ -125,12 +125,23 @@ for(sps in specs){
   # by equally distant bandwidths
   #bndwidth <- as.vector(seq(0, furthest, furthest/num_bands))[-1]
   
+  #### Croping variables to pres extent  + 5%
+  ext1 <- pres@bbox
+  incr1 <- apply(ext1, 1, function(x) x[2] - x[1]) * 0.05
+  ext1[1, 1] <- pres@bbox[1, 1] - incr1[1]
+  ext1[1, 2] <- pres@bbox[1, 2] + incr1[1]
+  ext1[2, 1] <- pres@bbox[2, 1] - incr1[2]
+  ext1[2, 2] <- pres@bbox[2, 2] + incr1[2]
+  varbles1 <- stack(crop(bioclim, ext1))
+  # number of background points (see Guevara et al, 2017)
+  num_bckgr1 <- (varbles1@ncols * varbles1@nrows) * 50/100 
+  
   
   #### Making models for each bandwidth ####
   #table with info to be exported
-  dt2exp <- as.data.frame(matrix(ncol = 8, nrow = 0))
+  dt2exp <- as.data.frame(matrix(ncol = 12, nrow = 0))
   selfinfo2exp <- as.data.frame(matrix(ncol = 9, nrow = 0))
-  dt2exp_mean <- as.data.frame(matrix(ncol = 4, nrow = 0))
+  dt2exp_mean <- as.data.frame(matrix(ncol = 5, nrow = 0))
   
   for (bdw in 1:length(bndwidth)) { # for each bandwidth
     x <- 1
@@ -140,7 +151,7 @@ for(sps in specs){
       # set of presences
       pres4model <- pres[pres$dist2centr <= bndwidth[bdw], ] 
 
-      # croping variables to pres4model extent  + 5%
+      # croping variables to pres4model extent  + 5%  <-- to fit the model
       ext <- pres4model@bbox
       incr <- apply(ext, 1, function(x) x[2] - x[1]) * 0.05
       ext[1, 1] <- pres4model@bbox[1, 1] - incr[1]
@@ -150,13 +161,13 @@ for(sps in specs){
       varbles <- stack(crop(bioclim, ext))
       
       # number of background points (see Guevara et al, 2017)
-      num_bckgr <- (varbles@ncols * varbles@nrows) * 50/100
+      num_bckgr <- (varbles@ncols * varbles@nrows) * 50/100 
       #if(num_bckgr<100) {
       #  pres4model1 <- sample(1:nrow(pres4model), nrow(pres4model)*0.1) 
       #  pres4model <- pres4model[pres4model1,]
       #}
 
-      # sampling presences for calibrating and predicting (70-30%)
+      # sampling presences for calibrating and testing (70-30%)
       folds <- sample(1:nrow(pres4model), nrow(pres4model)*0.7)  
       samp <- as.numeric(unlist(folds))
       pres4cali <- pres4model[samp, 1]
@@ -186,26 +197,36 @@ for(sps in specs){
       modl <- dir_func(varbles, pres4cali, num_bckgr, path)
       if(is.null(modl)){ break }
 
-      #making predictions
+      #making predictions on the same extent
       preds <- predict(modl, varbles, filename=paste0(path, "/predictions"), progress='text', overwrite=TRUE)
-      #plot(preds1)
-      
+
       #make evaluations
       bg <- randomPoints(varbles, num_bckgr) # background points
       evs <- evaluate(modl, p=pres4test, a=bg, x=varbles)
       save(evs, file = paste0(path, "/evaluations.RData"))
-
       #Computing Boyce Index
       byce <- ecospat.boyce(fit = preds, obs = pres4test@coords, nclass=0, window.w="default", res=100, PEplot = TRUE)
-      byce
       byce$Spearman.cor
       save(byce, file = paste0(path, "/boyce.RData"))
+
+            
+      #making predictions on the whole species extent
+      preds1 <- predict(modl, varbles1, filename=paste0(path, "/predictions_tot"), progress='text', overwrite=TRUE)
+
+      #make evaluations
+      bg1 <- randomPoints(varbles1, num_bckgr1) # background points
+      evs1 <- evaluate(modl, p=pres, a=bg1, x=varbles1)
+      save(evs1, file = paste0(path, "/evaluations_tot.RData"))
+      #Computing Boyce Index
+      byce1 <- ecospat.boyce(fit = preds1, obs = pres@coords, nclass=0, window.w="default", res=100, PEplot = TRUE)
+      byce1$Spearman.cor
+      save(byce1, file = paste0(path, "/boyce_tot.RData"))
       
       # gathering info to be exported
       t2 <- Sys.time() - t1
       if(attr(t2, "units") == "hours") {t2 <- t2*60; attr(t2, "units") <- "mins"}
       if(attr(t2, "units") == "secs") {t2 <- t2/60; attr(t2, "units") <- "mins"}
-      dt2exp_2 <- as.data.frame(matrix(c(specs_long, paste(bdw, x, sep="_"), bndwidth[bdw], nrow(modl@presence), evs@np, num_bckgr, evs@auc, byce$Spearman.cor), 1, 8, byrow = TRUE))
+      dt2exp_2 <- as.data.frame(matrix(c(specs_long, paste(bdw, x, sep="_"), bndwidth[bdw], nrow(modl@presence), evs@np, num_bckgr, evs@auc, byce$Spearman.cor, evs1@np, num_bckgr1, evs1@auc, byce1$Spearman.cor), 1, 12, byrow = TRUE))
       dt2exp <- rbind(dt2exp, dt2exp_2)  
       selfinfo2exp_2 <- as.data.frame(matrix(c(specs_long, paste(bdw, x, sep="_"), nrow(pres4cali), nrow(modl@presence), nrow(pres4test), evs@np, num_bckgr, evs@na, t2), 1, 9, byrow = TRUE))
       selfinfo2exp <- rbind(selfinfo2exp, selfinfo2exp_2)
@@ -217,17 +238,18 @@ for(sps in specs){
     
     print(paste0("computing average for ", specs_long, " - bandwidth #", bdw)) 
     dt2exp[,-c(1:6)] <- data.frame(lapply(dt2exp[-c(1:6)], function(x) as.numeric(as.character(x))))
-    dt2exp_m <- mean(dt2exp[(nrow(dt2exp)-n_times+1):nrow(dt2exp), ncol(dt2exp)], na.rm = TRUE)
+    dt2exp_m <- mean(dt2exp[(nrow(dt2exp)-n_times+1):nrow(dt2exp), (ncol(dt2exp)-4)], na.rm = TRUE) #mean Boyce partial area
+    dt2exp_m2 <- mean(dt2exp[(nrow(dt2exp)-n_times+1):nrow(dt2exp), ncol(dt2exp)], na.rm = TRUE) #mean Boyce whole area
     selfinfo2exp[,-c(1:8)] <- data.frame(lapply(selfinfo2exp[-c(1:8)], function(x) as.numeric(as.character(x))))
     dt2exp_m1 <- mean(selfinfo2exp[(nrow(selfinfo2exp)-n_times+1):nrow(selfinfo2exp), ncol(selfinfo2exp)], na.rm = TRUE)
-    dt2exp_mean_2 <- as.data.frame(matrix(c(specs_long, bndwidth[bdw], dt2exp_m, dt2exp_m1), 1, 4, byrow = TRUE))
+    dt2exp_mean_2 <- as.data.frame(matrix(c(specs_long, bndwidth[bdw], dt2exp_m, dt2exp_m2, dt2exp_m1), 1, 5, byrow = TRUE))
     dt2exp_mean <- rbind(dt2exp_mean, dt2exp_mean_2)
     rm(modl, preds, bg, evs, byce); gc()
 
   } # end of for each bandwidth
   
-  names(dt2exp_mean) <- c("Species", "Bandwidth", "BoyceIndex", "ExecutionTime")
-  names(dt2exp) <- c("Species", "ModelNum", "Bandwidth", "numPresencesCalib", "numPresencesTest", "numBackground", "AUC", "BoyceIndex")
+  names(dt2exp_mean) <- c("Species", "Bandwidth", "BoyceIndex_part", "BoyceIndex_tot", "ExecutionTime")
+  names(dt2exp) <- c("Species", "ModelNum", "Bandwidth", "numPresencesCalib", "numPresencesTest", "numBackground", "AUC", "BoyceIndex", "numPresencesTest_tot", "numBackground_tot", "AUC_tot", "BoyceIndex_tot")
   names(selfinfo2exp) <- c("Species", "ModelNum", "num_pres_calib", "num_pres_calib_used", "num_pres_test", "num_pres_test_used", "num_background", "num_bckgrnd_used", "exec_time")
   write.csv(dt2exp_mean, paste0(wd, "/results_", sps, "/info_mod_means_", sps, ".csv"), row.names = FALSE)
   write.csv(dt2exp, paste0(wd, "/results_", sps, "/info_mod_", sps, ".csv"), row.names = FALSE)
@@ -236,9 +258,9 @@ for(sps in specs){
   #### Making a plot ####
   graphics.off()
   dt2exp_mean[,-1] <- data.frame(lapply(dt2exp_mean[-1], function(x) as.numeric(as.character(x))))
-  dt2exp_mean[,names(dt2exp_mean) %in% "BoyceIndex"] <- round(dt2exp_mean[,names(dt2exp_mean) %in% "BoyceIndex"], 3)
-  pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, ".pdf"))
-  plt <- xyplot(BoyceIndex ~ Bandwidth, dt2exp_mean,
+  dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")] <- round(dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")], 3)
+  pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_part.pdf"))
+  plt <- xyplot(BoyceIndex_part ~ Bandwidth, dt2exp_mean,
                 #scales = list(y = list(log = 10)),
                 type = c("p", "smooth"), 
                 #type = c("p", "l"), 
@@ -254,13 +276,30 @@ for(sps in specs){
   plot(dbl_plt)
   dev.off()
   
+  pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_tot.pdf"))
+  plt2 <- xyplot(BoyceIndex_tot ~ Bandwidth, dt2exp_mean,
+                #scales = list(y = list(log = 10)),
+                type = c("p", "smooth"), 
+                #type = c("p", "l"), 
+                ylim = c(0.7, 1.05),
+                main = paste0("Boyce Index (mean of ", n_times, " models) - ", specs_long),
+                ylab = "Boyce Index", xlab = "Bandwidth (km)")
+  plt1 <- xyplot(ExecutionTime ~ Bandwidth, dt2exp_mean,
+                 type = c("p", "smooth"), 
+                 #type = c("p", "l"), 
+                 #ylim = c(0.8, 1.05),
+                 ylab = "Execution Time (min)" )
+  dbl_plt1 <- doubleYScale(plt2, plt1, add.ylab2 = TRUE)
+  plot(dbl_plt1)
+  dev.off()
+  
   #### Getting loess (smooth) curve ####
-  l_curve <- loess(BoyceIndex ~ Bandwidth, dt2exp_mean, span = 0.6)    #span=0.8 is default, for smoothing
-  l_preds <- stats::predict(l_curve)
-  plot(l_curve)
-  l_preds
-  l_slope <- diff(l_preds)
-  max_slp <- dt2exp_mean[which.max(l_slope), dt2exp_mean$BoyceIndex]
+#  l_curve <- loess(BoyceIndex ~ Bandwidth, dt2exp_mean, span = 0.6)    #span=0.8 is default, for smoothing
+#  l_preds <- stats::predict(l_curve)
+#  plot(l_curve)
+#  l_preds
+#  l_slope <- diff(l_preds)
+#  max_slp <- dt2exp_mean[which.max(l_slope), dt2exp_mean$BoyceIndex]
   
 } # end of loop for sps
 
