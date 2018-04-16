@@ -47,7 +47,7 @@ setwd(wd)
 #load(paste0(wd, "/.RData")
 
 # Need to download presence data from GBIF?
-# If so, provide a csv with the list of species called "species.csv"
+# If != "no", provide a csv with the list of species called "species.csv"
 pres2bdwnld <- "no"
 
 # Resolution
@@ -69,7 +69,7 @@ if(tolower(pres2bdwnld) != "no"){
 presences <- read.csv("gbif_data/sp_records.csv", header = TRUE)
 colnames(presences)[1:2] <- c("lat", "lon") 
 presences <- presences[, c(2,1,3,4)]
-#Selecting presences in Europe+Russia
+#Selecting presences in Europe + Russia + North Africa
 presences1 <- presences[presences$lon >= -10 & presences$lon <= 180, ]
 presences1 <- presences1[presences1$lat >= 27 & presences1$lat <= 82, ]
 #coordinates(presences) <- c("lon", "lat")  # setting spatial coordinates
@@ -87,7 +87,7 @@ if(tolower(clim2bdwnld) != "no"){
   bioclim <- getData('worldclim', var='bio', res = resol, path = paste0(wd, "/wc20_5m_biovars"))
   save(bioclim, file = "wc20_5m_biovars/wc5.RData")
 }
-load("wc20_5m_biovars/wc5.RData", verbose = TRUE)
+load("wc20_5m_biovars/wc5.RData", verbose = FALSE)
 
 #Making a mask (if necessary)
 mskng <- "no"
@@ -97,8 +97,8 @@ if(tolower(mskng) != "no"){
   }
 
 #### Modelling per each species ####
-#specs <- unique(presences$sp2)
-specs <- unique(presences$sp2)[1:4]
+specs <- unique(presences$sp2)
+#specs <- unique(presences$sp2)[1:4]
 
 for(sps in specs){
   pres <- presences[presences$sp2 %in% sps, ] # selecting for species
@@ -112,6 +112,8 @@ for(sps in specs){
   #names(pop_cent) <- c("x", "y")
   
   geocntr <- as.data.frame(geomean(pres))  #mean location for spherical (longitude/latitude) coordinates that deals with the angularity
+  #geocntr1 <- geocntr
+  #coordinates(geocntr1) <- c("x", "y") 
   
   pres$dist2centr <- distGeo(pres, geocntr) #in meters
   pres$dist2centr <- pres$dist2centr/1000   #in km
@@ -145,34 +147,43 @@ for(sps in specs){
   
   for (bdw in 1:length(bndwidth)) { # for each bandwidth
     x <- 1
+    # set of presences for modeling within the bandwidth
+    pres4model <- pres[pres$dist2centr <= bndwidth[bdw], ] 
+    
+    # croping variables to pres4model extent  + 5%  <-- to fit the model
+    ext <- pres4model@bbox
+    incr <- apply(ext, 1, function(x) x[2] - x[1]) * 0.05
+    ext[1, 1] <- pres4model@bbox[1, 1] - incr[1]
+    ext[1, 2] <- pres4model@bbox[1, 2] + incr[1]
+    ext[2, 1] <- pres4model@bbox[2, 1] - incr[2]
+    ext[2, 2] <- pres4model@bbox[2, 2] + incr[2]
+    varbles <- stack(crop(bioclim, ext))
+    
+    # number of background points (see Guevara et al, 2017)
+    num_bckgr <- (varbles@ncols * varbles@nrows) * 50/100 
+    #if(num_bckgr<100) {
+    #  pres4model1 <- sample(1:nrow(pres4model), nrow(pres4model)*0.1) 
+    #  pres4model <- pres4model[pres4model1,]
+    #}
+    
+    
+    # sampling presences for calibrating and testing (70-30%) within the bandwidth
+    folds <- sample(1:nrow(pres4model), nrow(pres4model)*0.7)  
+    samp <- as.numeric(unlist(folds))
+    pres4cali <- pres4model[samp, 1]
+    pres4test <- pres4model[-samp, 1]
+    rm(pres4model); gc()
+    
+    # sampling presences for testing on the whole extent (30% of total presences except those for calibrating)
+    pres1 <- pres[-samp, 1]
+    folds1 <- sample(1:nrow(pres1), nrow(pres1)*0.3)  
+    samp1 <- as.numeric(unlist(folds1))
+    pres4test_tot <- pres1[-samp1, 1]
+
+    
     repeat{   # maybe it can be done directly with maxent; if so, we would also have the "average-model"
       t1 <- Sys.time()
       print(paste0("modelling for ", specs_long, " - bandwidth #", bdw, "_", x))
-      # set of presences
-      pres4model <- pres[pres$dist2centr <= bndwidth[bdw], ] 
-
-      # croping variables to pres4model extent  + 5%  <-- to fit the model
-      ext <- pres4model@bbox
-      incr <- apply(ext, 1, function(x) x[2] - x[1]) * 0.05
-      ext[1, 1] <- pres4model@bbox[1, 1] - incr[1]
-      ext[1, 2] <- pres4model@bbox[1, 2] + incr[1]
-      ext[2, 1] <- pres4model@bbox[2, 1] - incr[2]
-      ext[2, 2] <- pres4model@bbox[2, 2] + incr[2]
-      varbles <- stack(crop(bioclim, ext))
-      
-      # number of background points (see Guevara et al, 2017)
-      num_bckgr <- (varbles@ncols * varbles@nrows) * 50/100 
-      #if(num_bckgr<100) {
-      #  pres4model1 <- sample(1:nrow(pres4model), nrow(pres4model)*0.1) 
-      #  pres4model <- pres4model[pres4model1,]
-      #}
-
-      # sampling presences for calibrating and testing (70-30%)
-      folds <- sample(1:nrow(pres4model), nrow(pres4model)*0.7)  
-      samp <- as.numeric(unlist(folds))
-      pres4cali <- pres4model[samp, 1]
-      pres4test <- pres4model[-samp, 1]
-      rm(pres4model); gc()
 
       # Running maxent from dismo 
       if(!file.exists(paste0(wd,"/results_", sps))) dir.create(paste0(wd,"/results_", sps))
@@ -200,27 +211,32 @@ for(sps in specs){
       #making predictions on the same extent
       preds <- predict(modl, varbles, filename=paste0(path, "/predictions"), progress='text', overwrite=TRUE)
 
-      #make evaluations
+      #make evaluations (on the same extent with 30% to test)
       bg <- randomPoints(varbles, num_bckgr) # background points
       evs <- evaluate(modl, p=pres4test, a=bg, x=varbles)
       save(evs, file = paste0(path, "/evaluations.RData"))
-      #Computing Boyce Index
+      #load(paste0(path, "/evaluations.RData"), verbose = TRUE)
+      
+      #Computing Boyce Index (on the same extent with 30% to test)
       byce <- ecospat.boyce(fit = preds, obs = pres4test@coords, nclass=0, window.w="default", res=100, PEplot = TRUE)
       byce$Spearman.cor
       save(byce, file = paste0(path, "/boyce.RData"))
+      #load(paste0(path, "/boyce.RData"), verbose = TRUE)
 
-            
-      #making predictions on the whole species extent
+      ## making predictions on the whole species extent
       preds1 <- predict(modl, varbles1, filename=paste0(path, "/predictions_tot"), progress='text', overwrite=TRUE)
 
       #make evaluations
       bg1 <- randomPoints(varbles1, num_bckgr1) # background points
-      evs1 <- evaluate(modl, p=pres, a=bg1, x=varbles1)
+      evs1 <- evaluate(modl, p=pres4test_tot, a=bg1, x=varbles1)
       save(evs1, file = paste0(path, "/evaluations_tot.RData"))
+      #load(paste0(path, "/evaluations_tot.RData"), verbose = T)
+      
       #Computing Boyce Index
-      byce1 <- ecospat.boyce(fit = preds1, obs = pres@coords, nclass=0, window.w="default", res=100, PEplot = TRUE)
+      byce1 <- ecospat.boyce(fit = preds1, obs = pres4test_tot@coords, nclass=0, window.w="default", res=100, PEplot = TRUE)
       byce1$Spearman.cor
       save(byce1, file = paste0(path, "/boyce_tot.RData"))
+      #load(paste0(path, "/boyce_tot.RData"), verbose = TRUE)
       
       # gathering info to be exported
       t2 <- Sys.time() - t1
@@ -265,15 +281,29 @@ for(sps in specs){
                 type = c("p", "smooth"), 
                 #type = c("p", "l"), 
                 ylim = c(0.8, 1.05),
+                col = "blue",
                 main = paste0("Boyce Index (mean of ", n_times, " models) - ", specs_long),
-                ylab = "Boyce Index", xlab = "Bandwidth (km)")
+                ylab = "Boyce Index", xlab = "Bandwidth (km)",
+                par.settings = list(col = "blue"),
+                key=list(space="right",
+                         lines=list(col=c("blue", "green", "red")),
+                         text=list(c("Boyce Index Partial","Boyce Index Total", "Execution Time"))
+                ))
   plt1 <- xyplot(ExecutionTime ~ Bandwidth, dt2exp_mean,
                  type = c("p", "smooth"), 
                  #type = c("p", "l"), 
                  #ylim = c(0.8, 1.05),
-                 ylab = "Execution Time (min)" )
+                 ylab = "Execution Time (min)",
+                 col = "red")
   dbl_plt <- doubleYScale(plt, plt1, add.ylab2 = TRUE)
   plot(dbl_plt)
+  plt2 <- xyplot(BoyceIndex_tot ~ Bandwidth, dt2exp_mean,
+                 type = c("p", "smooth"), 
+                 #type = c("p", "l"), 
+                 #ylim = c(0.8, 1.05),
+                 col = "green")
+
+  plot(dbl_plt + as.layer(plt2))
   dev.off()
   
   pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_tot.pdf"))
@@ -293,6 +323,14 @@ for(sps in specs){
   plot(dbl_plt1)
   dev.off()
   
+  
+} # end of loop for sps
+
+
+
+
+
+  
   #### Getting loess (smooth) curve ####
 #  l_curve <- loess(BoyceIndex ~ Bandwidth, dt2exp_mean, span = 0.6)    #span=0.8 is default, for smoothing
 #  l_preds <- stats::predict(l_curve)
@@ -300,6 +338,75 @@ for(sps in specs){
 #  l_preds
 #  l_slope <- diff(l_preds)
 #  max_slp <- dt2exp_mean[which.max(l_slope), dt2exp_mean$BoyceIndex]
+  # LOESS (SMOOTH)
+  
+  #DATA
+  set.seed(42)
+  x = rnorm(20)
+  y = rnorm(20)
+  x <- dt2exp_mean$Bandwidth
+  y <- dt2exp_mean$BoyceIndex_part
+  
+  #Plot the points
+  plot(x, y, type = "p", ylim = c(0.8, 1.2))
+  
+  #Obtain points for the smooth curve
+  temp = loess.smooth(x, y, span = 2/3, family = c("symmetric"), evaluation = 200) 
+  temp = loess.smooth(x, y, span = 2/3, family = c("gaussian"), evaluation = 50) 
+  temp = loess.smooth(x, y, span = 0.3, family = c("gaussian"), evaluation = 50) 
+  
+  #Plot smooth curve
+  lines(temp$x, temp$y, lwd = 2, col="green")
+  
+  #Obtain slope of the smooth curve
+  slopes <- diff(temp$y)/diff(temp$x)
+  slopes <- round(slopes, 5)
+  slopes <- ifelse(slopes < 0, NA, slopes)
+  min(slopes, na.rm = TRUE)
+  order(slopes)
+  
+  which(slopes == min(slopes, na.rm = TRUE))
+  temp$x[15] 
+  temp$y[15]
+  temp$x[30] 
+  temp$y[30]
+  slopes[15]
+  
+  #Add a trend line
+  abline(v = temp$x[21], col="pink" )
+  abline(v = temp$x[49], col="green" )
+  abline(v = temp$x[14], col="yellow" )
+  abline(v = temp$x[5], col="red" )
+  abline(v = temp$x[30], col="blue" )
+  abline(h = temp$y[34], col="blue" )
+  abline(lm(y~x))
+  
+  
+  
+  
+  plot(x, y, type = "p", ylim = c(0.8, 1.35))
+  
+  y.loess <- loess(y ~ x, span=0.7, data.frame(x=x, y=y))
+  y.predict <- predict(y.loess, data.frame(x=x))
+  
+  lines(x, y.predict, lwd = 2, col="red")
+  
+  
+  peak <- optimize(function(x, model) predict(model, data.frame(x=x)),
+                   c(min(x),max(x)),
+                   maximum=TRUE,
+                   model=y.loess) 
+  
+  
+  points(peak$maximum,peak$objective, pch=FILLED.CIRCLE<-19)
+  
+  xval <- approx(x = y.predict, y = x, xout = 1)$y    #sembla que és linear
+  spline(x = y.predict, y = x, xout = 1) #nonlinear
+  
+  
+  
+  
+  dev.off()
   
 } # end of loop for sps
 
