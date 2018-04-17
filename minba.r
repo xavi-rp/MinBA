@@ -36,6 +36,7 @@ library(ecospat)
 library(geosphere)
 library(ENMeval)
 #library(rnaturalearth)
+library(lattice)
 library(latticeExtra)
 # My useful functions
 source("https://raw.githubusercontent.com/xavi-rp/xavi_functions/master/xavi_functions.r")
@@ -275,7 +276,7 @@ for(sps in specs){
   graphics.off()
   dt2exp_mean[,-1] <- data.frame(lapply(dt2exp_mean[-1], function(x) as.numeric(as.character(x))))
   dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")] <- round(dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")], 3)
-  pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_part.pdf"))
+  pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_part_tot.pdf"))
   plt <- xyplot(BoyceIndex_part ~ Bandwidth, dt2exp_mean,
                 #scales = list(y = list(log = 10)),
                 type = c("p", "smooth"), 
@@ -284,19 +285,21 @@ for(sps in specs){
                 col = "blue",
                 main = paste0("Boyce Index (mean of ", n_times, " models) - ", specs_long),
                 ylab = "Boyce Index", xlab = "Bandwidth (km)",
-                par.settings = list(col = "blue"),
+                #par.settings = list(par.ylab.text = list(col = "black")),
+                par.settings = simpleTheme(col = 1),
                 key=list(space="right",
-                         lines=list(col=c("blue", "green", "red")),
+                         lines=list(col=c("blue", "green", "magenta")),
                          text=list(c("Boyce Index Partial","Boyce Index Total", "Execution Time"))
                 ))
   plt1 <- xyplot(ExecutionTime ~ Bandwidth, dt2exp_mean,
-                 type = c("p", "smooth"), 
-                 #type = c("p", "l"), 
+                 #type = c("p", "smooth"), 
+                 type = c("p", "r"), 
                  #ylim = c(0.8, 1.05),
                  ylab = "Execution Time (min)",
-                 col = "red")
+                 col = "magenta",
+                 par.settings = simpleTheme(col = "magenta"))
   dbl_plt <- doubleYScale(plt, plt1, add.ylab2 = TRUE)
-  plot(dbl_plt)
+  #plot(dbl_plt)
   plt2 <- xyplot(BoyceIndex_tot ~ Bandwidth, dt2exp_mean,
                  type = c("p", "smooth"), 
                  #type = c("p", "l"), 
@@ -306,22 +309,22 @@ for(sps in specs){
   plot(dbl_plt + as.layer(plt2))
   dev.off()
   
-  pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_tot.pdf"))
-  plt2 <- xyplot(BoyceIndex_tot ~ Bandwidth, dt2exp_mean,
+  #pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_tot.pdf"))
+  #plt2 <- xyplot(BoyceIndex_tot ~ Bandwidth, dt2exp_mean,
                 #scales = list(y = list(log = 10)),
-                type = c("p", "smooth"), 
+  #              type = c("p", "smooth"), 
                 #type = c("p", "l"), 
-                ylim = c(0.7, 1.05),
-                main = paste0("Boyce Index (mean of ", n_times, " models) - ", specs_long),
-                ylab = "Boyce Index", xlab = "Bandwidth (km)")
-  plt1 <- xyplot(ExecutionTime ~ Bandwidth, dt2exp_mean,
-                 type = c("p", "smooth"), 
-                 #type = c("p", "l"), 
+  #              ylim = c(0.7, 1.05),
+  #              main = paste0("Boyce Index (mean of ", n_times, " models) - ", specs_long),
+  #              ylab = "Boyce Index", xlab = "Bandwidth (km)")
+  #plt1 <- xyplot(ExecutionTime ~ Bandwidth, dt2exp_mean,
+                 #type = c("p", "smooth"), 
+  #               type = c("p", "l"), 
                  #ylim = c(0.8, 1.05),
-                 ylab = "Execution Time (min)" )
-  dbl_plt1 <- doubleYScale(plt2, plt1, add.ylab2 = TRUE)
-  plot(dbl_plt1)
-  dev.off()
+  #               ylab = "Execution Time (min)" )
+  #dbl_plt1 <- doubleYScale(plt2, plt1, add.ylab2 = TRUE)
+  #plot(dbl_plt1)
+  #dev.off()
   
   
 } # end of loop for sps
