@@ -67,7 +67,7 @@ n_times <- 3
 if(tolower(pres2bdwnld) != "no"){
   source(paste0(wd, "/gbif_data.r"))
   }
-presences <- read.csv("gbif_data/sp_records.csv", header = TRUE)
+presences <- read.csv("gbif_data/sp_records_2.csv", header = TRUE)
 colnames(presences)[1:2] <- c("lat", "lon") 
 presences <- presences[, c(2,1,3,4)]
 #Selecting presences in Europe + Russia + North Africa
@@ -223,22 +223,30 @@ for(sps in specs){
       byce$Spearman.cor
       save(byce, file = paste0(path, "/boyce.RData"))
       #load(paste0(path, "/boyce.RData"), verbose = TRUE)
-
-      ## making predictions on the whole species extent
-      preds1 <- predict(modl, varbles1, filename=paste0(path, "/predictions_tot"), progress='text', overwrite=TRUE)
-
-      #make evaluations
-      bg1 <- randomPoints(varbles1, num_bckgr1) # background points
-      evs1 <- evaluate(modl, p=pres4test_tot, a=bg1, x=varbles1)
-      save(evs1, file = paste0(path, "/evaluations_tot.RData"))
-      #load(paste0(path, "/evaluations_tot.RData"), verbose = T)
       
-      #Computing Boyce Index
-      byce1 <- ecospat.boyce(fit = preds1, obs = pres4test_tot@coords, nclass=0, window.w="default", res=100, PEplot = TRUE)
-      byce1$Spearman.cor
-      save(byce1, file = paste0(path, "/boyce_tot.RData"))
-      #load(paste0(path, "/boyce_tot.RData"), verbose = TRUE)
-      
+      if(bdw != length(bndwidth)){ #except the last bandwith (it make no sense repeating predictions/evaluations on the same extent)
+        
+        ## making predictions on the whole species extent
+        preds1 <- predict(modl, varbles1, filename=paste0(path, "/predictions_tot"), progress='text', overwrite=TRUE)
+        
+        #make evaluations
+        bg1 <- randomPoints(varbles1, num_bckgr1) # background points
+        evs1 <- evaluate(modl, p=pres4test_tot, a=bg1, x=varbles1)
+        save(evs1, file = paste0(path, "/evaluations_tot.RData"))
+        #load(paste0(path, "/evaluations_tot.RData"), verbose = T)
+        
+        #Computing Boyce Index
+        byce1 <- ecospat.boyce(fit = preds1, obs = pres4test_tot@coords, nclass=0, window.w="default", res=100, PEplot = TRUE)
+        byce1$Spearman.cor
+        save(byce1, file = paste0(path, "/boyce_tot.RData"))
+        #load(paste0(path, "/boyce_tot.RData"), verbose = TRUE)
+        
+      }else{  # if it is the last bandwidth
+        preds1 <- preds
+        bg1 <- bg
+        evs1 <- evs
+        byce1 <- byce
+      }
       # gathering info to be exported
       t2 <- Sys.time() - t1
       if(attr(t2, "units") == "hours") {t2 <- t2*60; attr(t2, "units") <- "mins"}
@@ -261,12 +269,12 @@ for(sps in specs){
     dt2exp_m1 <- mean(selfinfo2exp[(nrow(selfinfo2exp)-n_times+1):nrow(selfinfo2exp), ncol(selfinfo2exp)], na.rm = TRUE)
     dt2exp_mean_2 <- as.data.frame(matrix(c(specs_long, bndwidth[bdw], dt2exp_m, dt2exp_m2, dt2exp_m1), 1, 5, byrow = TRUE))
     dt2exp_mean <- rbind(dt2exp_mean, dt2exp_mean_2)
-    rm(modl, preds, bg, evs, byce); gc()
+    rm(modl, preds, preds1, bg, evs, byce); gc()
 
   } # end of for each bandwidth
   
   names(dt2exp_mean) <- c("Species", "Bandwidth", "BoyceIndex_part", "BoyceIndex_tot", "ExecutionTime")
-  names(dt2exp) <- c("Species", "ModelNum", "Bandwidth", "numPresencesCalib", "numPresencesTest", "numBackground", "AUC", "BoyceIndex", "numPresencesTest_tot", "numBackground_tot", "AUC_tot", "BoyceIndex_tot")
+  names(dt2exp) <- c("Species", "ModelNum", "Bandwidth", "numPresencesCalib", "numPresencesTest", "numBackground", "AUC_part", "BoyceIndex", "numPresencesTest_tot", "numBackground_tot", "AUC_tot", "BoyceIndex_tot")
   names(selfinfo2exp) <- c("Species", "ModelNum", "num_pres_calib", "num_pres_calib_used", "num_pres_test", "num_pres_test_used", "num_background", "num_bckgrnd_used", "exec_time")
   write.csv(dt2exp_mean, paste0(wd, "/results_", sps, "/info_mod_means_", sps, ".csv"), row.names = FALSE)
   write.csv(dt2exp, paste0(wd, "/results_", sps, "/info_mod_", sps, ".csv"), row.names = FALSE)
@@ -329,7 +337,7 @@ for(sps in specs){
   
 } # end of loop for sps
 
-
+#
 
 
 
