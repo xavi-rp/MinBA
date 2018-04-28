@@ -67,7 +67,7 @@ n_times <- 3
 if(tolower(pres2bdwnld) != "no"){
   source(paste0(wd, "/gbif_data.r"))
   }
-presences <- read.csv("gbif_data/sp_records_2.csv", header = TRUE)
+presences <- read.csv("gbif_data/sp_records.csv", header = TRUE)
 colnames(presences)[1:2] <- c("lat", "lon") 
 presences <- presences[, c(2,1,3,4)]
 #Selecting presences in Europe + Russia + North Africa
@@ -99,7 +99,9 @@ if(tolower(mskng) != "no"){
 
 #### Modelling per each species ####
 specs <- unique(presences$sp2)
-#specs <- unique(presences$sp2)[1:4]
+#specs <- unique(presences$sp2)[-c(1:4)]
+
+best2_bnd_2exp <- as.data.frame(matrix(ncol = 0, nrow = 0)) # a table to export rankings of best and 2nd best bandwidth
 
 for(sps in specs){
   pres <- presences[presences$sp2 %in% sps, ] # selecting for species
@@ -224,7 +226,7 @@ for(sps in specs){
       save(byce, file = paste0(path, "/boyce.RData"))
       #load(paste0(path, "/boyce.RData"), verbose = TRUE)
       
-      if(bdw != length(bndwidth)){ #except the last bandwith (it make no sense repeating predictions/evaluations on the same extent)
+      if(bdw != length(bndwidth)){ #except the last bandwith (it makes no sense repeating predictions/evaluations on the same extent)
         
         ## making predictions on the whole species extent
         preds1 <- predict(modl, varbles1, filename=paste0(path, "/predictions_tot"), progress='text', overwrite=TRUE)
@@ -276,6 +278,21 @@ for(sps in specs){
   names(dt2exp_mean) <- c("Species", "Bandwidth", "BoyceIndex_part", "BoyceIndex_tot", "ExecutionTime")
   names(dt2exp) <- c("Species", "ModelNum", "Bandwidth", "numPresencesCalib", "numPresencesTest", "numBackground", "AUC_part", "BoyceIndex", "numPresencesTest_tot", "numBackground_tot", "AUC_tot", "BoyceIndex_tot")
   names(selfinfo2exp) <- c("Species", "ModelNum", "num_pres_calib", "num_pres_calib_used", "num_pres_test", "num_pres_test_used", "num_background", "num_bckgrnd_used", "exec_time")
+  
+  computing_ranks <- 1
+  if (computing_ranks == 1){
+    dt2exp_mean$rankBI_part <- rank(-dt2exp_mean$BoyceIndex_part, ties.method = "first")
+    dt2exp_mean$rankBI_tot <- rank(-dt2exp_mean$BoyceIndex_tot, ties.method = "first")
+    dt2exp_mean$rankFinal <- rank((dt2exp_mean$rankBI_part + dt2exp_mean$rankBI_tot), ties.method = "first")
+    
+    best2_bnd <- c(sps, row.names(dt2exp_mean[dt2exp_mean$rankFinal == 1, ]), row.names(dt2exp_mean[dt2exp_mean$rankFinal == 2, ]))
+    best2_bnd <- as.data.frame(t(best2_bnd))
+    names(best2_bnd) <- c("Species", "Best_Bandwidth", "X2ndBest_bandwidth")
+    
+    best2_bnd_2exp <- rbind(best2_bnd_2exp, best2_bnd)
+    write.csv(best2_bnd_2exp, paste0(wd, "/rankingBestBandwidth.csv"), row.names = FALSE)
+  }
+  
   write.csv(dt2exp_mean, paste0(wd, "/results_", sps, "/info_mod_means_", sps, ".csv"), row.names = FALSE)
   write.csv(dt2exp, paste0(wd, "/results_", sps, "/info_mod_", sps, ".csv"), row.names = FALSE)
   write.csv(selfinfo2exp, paste0(wd, "/results_", sps, "/selfinfo_mod_", sps, ".csv"), row.names = FALSE)
@@ -287,29 +304,33 @@ for(sps in specs){
   pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_part_tot.pdf"))
   plt <- xyplot(BoyceIndex_part ~ Bandwidth, dt2exp_mean,
                 #scales = list(y = list(log = 10)),
-                type = c("p", "smooth"), 
+                type = c("p", "smooth"),
+                span = 0.8,
                 #type = c("p", "l"), 
                 ylim = c(0.8, 1.05),
                 col = "blue",
                 main = paste0("Boyce Index (mean of ", n_times, " models) - ", specs_long),
                 ylab = "Boyce Index", xlab = "Bandwidth (km)",
                 #par.settings = list(par.ylab.text = list(col = "black")),
-                par.settings = simpleTheme(col = 1),
-                key=list(space="right",
-                         lines=list(col=c("blue", "green", "magenta")),
-                         text=list(c("Boyce Index Partial","Boyce Index Total", "Execution Time"))
+                #par.settings = simpleTheme(col = 1),
+                key=list(#space = "right",
+                         x=0.5,y=0.2,
+                         lines = list(col=c("blue", "green", "magenta")),
+                         text = list(c("Boyce Index Partial","Boyce Index Total", "Execution Time"))
                 ))
   plt1 <- xyplot(ExecutionTime ~ Bandwidth, dt2exp_mean,
                  #type = c("p", "smooth"), 
                  type = c("p", "r"), 
                  #ylim = c(0.8, 1.05),
                  ylab = "Execution Time (min)",
-                 col = "magenta",
-                 par.settings = simpleTheme(col = "magenta"))
+                 col = "magenta"
+                 #,par.settings = simpleTheme(col = "magenta")
+                 )
   dbl_plt <- doubleYScale(plt, plt1, add.ylab2 = TRUE)
   #plot(dbl_plt)
   plt2 <- xyplot(BoyceIndex_tot ~ Bandwidth, dt2exp_mean,
-                 type = c("p", "smooth"), 
+                 type = c("p", "smooth"),
+                 span = 0.8,
                  #type = c("p", "l"), 
                  #ylim = c(0.8, 1.05),
                  col = "green")
