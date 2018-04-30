@@ -271,6 +271,8 @@ for(sps in specs){
     dt2exp_m1 <- mean(selfinfo2exp[(nrow(selfinfo2exp)-n_times+1):nrow(selfinfo2exp), ncol(selfinfo2exp)], na.rm = TRUE)
     dt2exp_mean_2 <- as.data.frame(matrix(c(specs_long, bndwidth[bdw], dt2exp_m, dt2exp_m2, dt2exp_m1), 1, 5, byrow = TRUE))
     dt2exp_mean <- rbind(dt2exp_mean, dt2exp_mean_2)
+    dt2exp_mean[, c(2:5)] <- data.frame(lapply(dt2exp_mean[c(2:5)], function(x) as.numeric(as.character(x))))
+    
     rm(modl, preds, preds1, bg, evs, byce); gc()
 
   } # end of for each bandwidth
@@ -283,11 +285,17 @@ for(sps in specs){
   if (computing_ranks == 1){
     dt2exp_mean$rankBI_part <- rank(-dt2exp_mean$BoyceIndex_part, ties.method = "first")
     dt2exp_mean$rankBI_tot <- rank(-dt2exp_mean$BoyceIndex_tot, ties.method = "first")
-    dt2exp_mean$rankFinal <- rank((dt2exp_mean$rankBI_part + dt2exp_mean$rankBI_tot), ties.method = "first")
+    dt2exp_mean$rankTime <- rank(dt2exp_mean$ExecutionTime, ties.method = "first")
+    dt2exp_mean$rankFinalNoTime <- rank((dt2exp_mean$rankBI_part + dt2exp_mean$rankBI_tot), ties.method = "first")
+    dt2exp_mean$rankFinalWithTime <- rank((dt2exp_mean$rankBI_part + dt2exp_mean$rankBI_tot + dt2exp_mean$rankTime), ties.method = "first")
     
-    best2_bnd <- c(sps, row.names(dt2exp_mean[dt2exp_mean$rankFinal == 1, ]), row.names(dt2exp_mean[dt2exp_mean$rankFinal == 2, ]))
+    best2_bnd <- c(sps, 
+                   row.names(dt2exp_mean[dt2exp_mean$rankFinalNoTime == 1, ]), 
+                   row.names(dt2exp_mean[dt2exp_mean$rankFinalNoTime == 2, ]),
+                   row.names(dt2exp_mean[dt2exp_mean$rankFinalWithTime == 1, ]), 
+                   row.names(dt2exp_mean[dt2exp_mean$rankFinalWithTime == 2, ]))
     best2_bnd <- as.data.frame(t(best2_bnd))
-    names(best2_bnd) <- c("Species", "Best_Bandwidth", "X2ndBest_bandwidth")
+    names(best2_bnd) <- c("Species", "Best_Bandwidth_NoTime", "SecondBest_bandwidth_NoTime", "Best_Bandwidth_WithTime", "SecondBest_bandwidth_WithTime")
     
     best2_bnd_2exp <- rbind(best2_bnd_2exp, best2_bnd)
     write.csv(best2_bnd_2exp, paste0(wd, "/rankingBestBandwidth.csv"), row.names = FALSE)
@@ -299,7 +307,7 @@ for(sps in specs){
   
   #### Making a plot ####
   graphics.off()
-  dt2exp_mean[,-1] <- data.frame(lapply(dt2exp_mean[-1], function(x) as.numeric(as.character(x))))
+  #dt2exp_mean[,-1] <- data.frame(lapply(dt2exp_mean[-1], function(x) as.numeric(as.character(x))))
   dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")] <- round(dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")], 3)
   pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_part_tot.pdf"))
   plt <- xyplot(BoyceIndex_part ~ Bandwidth, dt2exp_mean,
@@ -309,7 +317,7 @@ for(sps in specs){
                 #type = c("p", "l"), 
                 ylim = c(0.8, 1.05),
                 col = "blue",
-                main = paste0("Boyce Index (mean of ", n_times, " models) - ", specs_long),
+                main = bquote(Boyce~Index~(mean~of~.(n_times)~models)~-~italic(.(specs_long))),
                 ylab = "Boyce Index", xlab = "Bandwidth (km)",
                 #par.settings = list(par.ylab.text = list(col = "black")),
                 #par.settings = simpleTheme(col = 1),
@@ -337,24 +345,6 @@ for(sps in specs){
 
   plot(dbl_plt + as.layer(plt2))
   dev.off()
-  
-  #pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_tot.pdf"))
-  #plt2 <- xyplot(BoyceIndex_tot ~ Bandwidth, dt2exp_mean,
-                #scales = list(y = list(log = 10)),
-  #              type = c("p", "smooth"), 
-                #type = c("p", "l"), 
-  #              ylim = c(0.7, 1.05),
-  #              main = paste0("Boyce Index (mean of ", n_times, " models) - ", specs_long),
-  #              ylab = "Boyce Index", xlab = "Bandwidth (km)")
-  #plt1 <- xyplot(ExecutionTime ~ Bandwidth, dt2exp_mean,
-                 #type = c("p", "smooth"), 
-  #               type = c("p", "l"), 
-                 #ylim = c(0.8, 1.05),
-  #               ylab = "Execution Time (min)" )
-  #dbl_plt1 <- doubleYScale(plt2, plt1, add.ylab2 = TRUE)
-  #plot(dbl_plt1)
-  #dev.off()
-  
   
 } # end of loop for sps
 
