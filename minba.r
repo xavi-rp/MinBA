@@ -350,8 +350,39 @@ for(sps in specs){
 
 #
 
+#### Frequences of Best bandwidth #### 
 
+best2_bnd_2exp <- read.csv(paste0(wd, "/rankingBestBandwidth.csv"), header = TRUE)
+frec_best_NoTime <- as.data.frame(table(best2_bnd_2exp$Best_Bandwidth_NoTime))
+frec_best_WithTime <- as.data.frame(table(best2_bnd_2exp$Best_Bandwidth_WithTime))
 
+frec_best <- as.data.frame(matrix(seq(1:num_bands), nrow = num_bands, ncol = 1))
+frec_best <- merge(frec_best, frec_best_NoTime, by.x = "V1", by.y = "Var1", all = TRUE)
+frec_best <- merge(frec_best, frec_best_WithTime, by.x = "V1", by.y = "Var1", all = TRUE)
+frec_best[is.na(frec_best)] <- 0 
+names(frec_best) <- c("BandwidthNum", "Frec_Best_NoTime", "Frec_Best_WithTime")
+
+barchart(Freq ~ Var1, frec_best_NoTime)
+barchart(Freq ~ Var1, frec_best_WithTime)
+
+palte <- colorRampPalette(colors = c("darkgreen", "green", "yellow", "orange", "red", "darkred"))(num_bands)
+
+pdf(paste0(wd, "/BestBandwidths.pdf"))
+par(xpd = TRUE, mar = par()$mar + c(3,1,0,0))
+barplot(as.matrix(frec_best[,c(2:3)]), 
+        main = "Best Bandwidth With and Without Execution Time", ylab = "Frequencies", 
+        ylim = c(0, (max(frec_best_NoTime$Freq, frec_best_WithTime$Freq) + 1)),
+        beside = TRUE, space = c(0.1, 1),
+        col = palte,
+        #names.arg = c(1:10, 1:10),
+        names.arg = c("With Execution Time", "Without Execution Time"),
+        cex.names = 1, las = 1)
+legend((num_bands/2), -1.5, 
+       legend = frec_best$BandwidthNum, 
+       fill = palte,
+       title = "Bandwith Number", cex = 1, ncol = (num_bands/2))
+
+dev.off()
   
   #### Getting loess (smooth) curve ####
 #  l_curve <- loess(BoyceIndex ~ Bandwidth, dt2exp_mean, span = 0.6)    #span=0.8 is default, for smoothing
