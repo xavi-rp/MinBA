@@ -47,9 +47,11 @@ wd <- "~/Google Drive/MinBA"
 setwd(wd)
 #load(paste0(wd, "/.RData")
 
-# Need to download presence data from GBIF?
+# Need to download presence data from GBIF/Bioatles?
 # If != "no", provide a csv with the list of species called "species.csv"
 pres2bdwnld <- "no"
+data_rep <- "gbif"
+data_rep <- "bioatles"
 
 # Resolution
 resol <- 5  # 5 arcmin ~ 4.5 km2
@@ -65,8 +67,10 @@ n_times <- 3
 
 #### Retrieving Presence Records ####
 if(tolower(pres2bdwnld) != "no"){
-  source(paste0(wd, "/gbif_data.r"))
-  }
+  if (data_rep == "gbif")  source(paste0(wd, "/gbif_data.r"))
+  if (data_rep == "bioatles")  source(paste0(wd, "/bioatles_data.r"))
+}
+
 presences <- read.csv("gbif_data/sp_records.csv", header = TRUE)
 colnames(presences)[1:2] <- c("lat", "lon") 
 presences <- presences[, c(2,1,3,4)]
@@ -384,7 +388,14 @@ legend((num_bands/2), -1.5,
 
 dev.off()
   
-  #### Getting loess (smooth) curve ####
+  
+
+
+
+
+
+
+#### Getting loess (smooth) curve ####
 #  l_curve <- loess(BoyceIndex ~ Bandwidth, dt2exp_mean, span = 0.6)    #span=0.8 is default, for smoothing
 #  l_preds <- stats::predict(l_curve)
 #  plot(l_curve)
