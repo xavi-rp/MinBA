@@ -45,7 +45,9 @@ source("https://raw.githubusercontent.com/xavi-rp/xavi_functions/master/xavi_fun
 #### Settings ####
 wd <- "~/Google Drive/MinBA"
 setwd(wd)
-#load(paste0(wd, "/.RData")
+dir2save <- paste0(wd, "/minba_", format(Sys.Date(), format="%Y%m%d"))
+if(!file.exists(dir2save)) dir.create(dir2save)
+
 
 # Need to download presence data from GBIF/Bioatles?
 # If != "no", provide a csv with the list of species called "species.csv"
@@ -54,7 +56,9 @@ data_rep <- "gbif"
 data_rep <- "bioatles"
 
 # Resolution
-resol <- 5  # 5 arcmin ~ 4.5 km2
+if (data_rep == "gbif") resol <- 5  # 5 arcmin ~ 4.5 km2
+if (data_rep == "bioatles") resol <- 0.5  # 30 arcsec ~ 1 km2
+
 # Need to download climatic data?
 clim2bdwnld <- "no"
 
@@ -71,7 +75,9 @@ if(tolower(pres2bdwnld) != "no"){
   if (data_rep == "bioatles")  source(paste0(wd, "/bioatles_data.r"))
 }
 
-presences <- read.csv("gbif_data/sp_records.csv", header = TRUE)
+if (data_rep == "gbif")  presences <- read.csv("gbif_data/sp_records.csv", header = TRUE)
+if (data_rep == "bioatles")  presences <- read.csv("bioatles/sp_records.csv", header = TRUE)
+
 colnames(presences)[1:2] <- c("lat", "lon") 
 presences <- presences[, c(2,1,3,4)]
 #Selecting presences in Europe + Russia + North Africa
@@ -89,10 +95,20 @@ gc()
 #### Climatic Data ####
 #Downloading data from worldclim.org
 if(tolower(clim2bdwnld) != "no"){
-  bioclim <- getData('worldclim', var='bio', res = resol, path = paste0(wd, "/wc20_5m_biovars"))
-  save(bioclim, file = "wc20_5m_biovars/wc5.RData")
+  if (data_rep == "gbif"){
+    bioclim <- getData('worldclim', var='bio', res = resol, path = paste0(wd))
+    save(bioclim, file = "wc5/wc5.RData")
+  }
+  if (data_rep == "bioatles"){
+    bioclim_16 <- getData('worldclim', var='bio', res = resol, lon=3, lat=39,
+                          path = paste0(wd))  # importing tile 16
+    bioclim <- bioclim_16
+    save(bioclim, file = "wc0.5/wc05.RData")
+  }
 }
-load("wc20_5m_biovars/wc5.RData", verbose = FALSE)
+if (data_rep == "gbif")  load("wc5/wc5.RData", verbose = FALSE)
+if (data_rep == "bioatles")  load("wc0.5/wc05.RData", verbose = FALSE)
+
 
 #Making a mask (if necessary)
 mskng <- "no"
@@ -112,6 +128,7 @@ for(sps in specs){
   specs_long <- as.character(unique(pres$species)) # complete name of the species
   pres <- pres[, c(1,2,4)]
   coordinates(pres) <- c("lon", "lat")  # setting spatial coordinates
+  #plot(pres)
   
   #### Calculating the centre of the population, its most distant point and "bands" ####
   #pop_cent <- c(mean(presences$x, na.rm =TRUE), mean(presences$y, na.rm =TRUE))
@@ -121,6 +138,7 @@ for(sps in specs){
   geocntr <- as.data.frame(geomean(pres))  #mean location for spherical (longitude/latitude) coordinates that deals with the angularity
   #geocntr1 <- geocntr
   #coordinates(geocntr1) <- c("x", "y") 
+  #plot(geocntr1, col = "green", add = TRUE)
   
   pres$dist2centr <- distGeo(pres, geocntr) #in meters
   pres$dist2centr <- pres$dist2centr/1000   #in km
@@ -142,6 +160,7 @@ for(sps in specs){
   ext1[2, 1] <- pres@bbox[2, 1] - incr1[2]
   ext1[2, 2] <- pres@bbox[2, 2] + incr1[2]
   varbles1 <- stack(crop(bioclim, ext1))
+
   # number of background points (see Guevara et al, 2017)
   num_bckgr1 <- (varbles1@ncols * varbles1@nrows) * 50/100 
   
@@ -165,6 +184,9 @@ for(sps in specs){
     ext[2, 1] <- pres4model@bbox[2, 1] - incr[2]
     ext[2, 2] <- pres4model@bbox[2, 2] + incr[2]
     varbles <- stack(crop(bioclim, ext))
+    #dev.off()
+    #plot(varbles$bio1)
+    #plot(pres, add = TRUE)
     
     # number of background points (see Guevara et al, 2017)
     num_bckgr <- (varbles@ncols * varbles@nrows) * 50/100 
@@ -193,9 +215,9 @@ for(sps in specs){
       print(paste0("modelling for ", specs_long, " - bandwidth #", bdw, "_", x))
 
       # Running maxent from dismo 
-      if(!file.exists(paste0(wd,"/results_", sps))) dir.create(paste0(wd,"/results_", sps))
-      if(!file.exists(paste0(wd,"/results_", sps, "/model_", sps, "_", bdw, "_", x))) dir.create(paste0(wd,"/results_", sps, "/model_", sps, "_", bdw, "_", x))
-      path <- paste0(wd,"/results_", sps,"/model_", sps, "_", bdw, "_", x)
+      if(!file.exists(paste0(dir2save,"/results_", sps))) dir.create(paste0(dir2save,"/results_", sps))
+      if(!file.exists(paste0(dir2save,"/results_", sps, "/model_", sps, "_", bdw, "_", x))) dir.create(paste0(dir2save,"/results_", sps, "/model_", sps, "_", bdw, "_", x))
+      path <- paste0(dir2save,"/results_", sps,"/model_", sps, "_", bdw, "_", x)
       
       dir_func <- function(varbles, pres4cali, num_bckgr, path){ # to avoid stop modelling if low number of background points or other errors
         res <- tryCatch(
@@ -302,18 +324,18 @@ for(sps in specs){
     names(best2_bnd) <- c("Species", "Best_Bandwidth_NoTime", "SecondBest_bandwidth_NoTime", "Best_Bandwidth_WithTime", "SecondBest_bandwidth_WithTime")
     
     best2_bnd_2exp <- rbind(best2_bnd_2exp, best2_bnd)
-    write.csv(best2_bnd_2exp, paste0(wd, "/rankingBestBandwidth.csv"), row.names = FALSE)
+    write.csv(best2_bnd_2exp, paste0(dir2save, "/rankingBestBandwidth.csv"), row.names = FALSE)
   }
   
-  write.csv(dt2exp_mean, paste0(wd, "/results_", sps, "/info_mod_means_", sps, ".csv"), row.names = FALSE)
-  write.csv(dt2exp, paste0(wd, "/results_", sps, "/info_mod_", sps, ".csv"), row.names = FALSE)
-  write.csv(selfinfo2exp, paste0(wd, "/results_", sps, "/selfinfo_mod_", sps, ".csv"), row.names = FALSE)
+  write.csv(dt2exp_mean, paste0(dir2save, "/results_", sps, "/info_mod_means_", sps, ".csv"), row.names = FALSE)
+  write.csv(dt2exp, paste0(dir2save, "/results_", sps, "/info_mod_", sps, ".csv"), row.names = FALSE)
+  write.csv(selfinfo2exp, paste0(dir2save, "/results_", sps, "/selfinfo_mod_", sps, ".csv"), row.names = FALSE)
   
   #### Making a plot ####
   graphics.off()
   #dt2exp_mean[,-1] <- data.frame(lapply(dt2exp_mean[-1], function(x) as.numeric(as.character(x))))
   dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")] <- round(dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")], 3)
-  pdf(paste0(wd, "/results_", sps, "/boyce_bandwidth_", sps, "_part_tot.pdf"))
+  pdf(paste0(dir2save, "/results_", sps, "/boyce_bandwidth_", sps, "_part_tot.pdf"))
   plt <- xyplot(BoyceIndex_part ~ Bandwidth, dt2exp_mean,
                 #scales = list(y = list(log = 10)),
                 type = c("p", "smooth"),
@@ -356,7 +378,7 @@ for(sps in specs){
 
 #### Frequences of Best bandwidth #### 
 
-best2_bnd_2exp <- read.csv(paste0(wd, "/rankingBestBandwidth.csv"), header = TRUE)
+best2_bnd_2exp <- read.csv(paste0(dir2save, "/rankingBestBandwidth.csv"), header = TRUE)
 frec_best_NoTime <- as.data.frame(table(best2_bnd_2exp$Best_Bandwidth_NoTime))
 frec_best_WithTime <- as.data.frame(table(best2_bnd_2exp$Best_Bandwidth_WithTime))
 
@@ -371,7 +393,7 @@ barchart(Freq ~ Var1, frec_best_WithTime)
 
 palte <- colorRampPalette(colors = c("darkgreen", "green", "yellow", "orange", "red", "darkred"))(num_bands)
 
-pdf(paste0(wd, "/BestBandwidths.pdf"))
+pdf(paste0(dir2save, "/BestBandwidths.pdf"))
 par(xpd = TRUE, mar = par()$mar + c(3,1,0,0))
 barplot(as.matrix(frec_best[,c(2:3)]), 
         main = "Best Bandwidth With and Without Execution Time", ylab = "Frequencies", 

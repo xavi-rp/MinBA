@@ -102,5 +102,6 @@ data1$sp2 <- tolower(paste(substr(data1$species, 1, 3), substr(sub("^\\S+\\s+", 
 
 
 #### Saving data ####
-write.csv(data1, paste0(out_name, ".csv"), quote = FALSE, row.names = FALSE)
+print("Saving GBIF data as ", paste0(wd, "/", out_name, ".csv"))
+write.csv(data1, paste0(wd, "/", out_name, ".csv"), quote = FALSE, row.names = FALSE)
 # data1 <- read.csv(paste0(out_name, ".csv"), header = TRUE)

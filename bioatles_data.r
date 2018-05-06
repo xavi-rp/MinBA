@@ -77,7 +77,7 @@ for (sps in species) {
   pres2export <- tbl_sp[[2]]
   pres2export <- pres2export[-c(1, ncol(pres2export))]
 
-  write.csv(pres2export, paste0(wd, "/pres_bioatles_", spec2))
+  write.csv(pres2export, paste0(wd, "/pres_bioatles_", spec2, ".csv"))
   
   data02 <- pres2export[, c(7, 1, 2)]
   data02 <- data02[!duplicated(data02), ]
@@ -98,8 +98,10 @@ for (sps in species) {
 
   data1 <- rbind(data1, data02)
 }
+data1 <- data1[, c(2, 1, 3, 4)]
 
 #### Saving data ####
+print("Saving Bioatles data as ", paste0(wd, "/", out_name, ".csv"))
 write.csv(data1, paste0(wd, "/", out_name, ".csv"), quote = FALSE, row.names = FALSE)
 # data1 <- read.csv(paste0(out_name, ".csv"), header = TRUE)
 
