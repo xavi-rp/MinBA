@@ -45,6 +45,8 @@ source("https://raw.githubusercontent.com/xavi-rp/xavi_functions/master/xavi_fun
 #### Settings ####
 wd <- "~/Google Drive/MinBA"
 setwd(wd)
+dir2save <- paste0(wd, "/minba_20180430")
+dir2save <- paste0(wd, "/minba_20180506")
 dir2save <- paste0(wd, "/minba_", format(Sys.Date(), format="%Y%m%d"))
 if(!file.exists(dir2save)) dir.create(dir2save)
 
@@ -106,8 +108,8 @@ if(tolower(clim2bdwnld) != "no"){
     save(bioclim, file = "wc0.5/wc05.RData")
   }
 }
-if (data_rep == "gbif")  load("wc5/wc5.RData", verbose = FALSE)
-if (data_rep == "bioatles")  load("wc0.5/wc05.RData", verbose = FALSE)
+if (data_rep == "gbif")  load(paste0(wd, "/wc5/wc5.RData"), verbose = FALSE)
+if (data_rep == "bioatles")  load(paste0(wd, "/wc0.5/wc05.RData"), verbose = FALSE)
 
 
 #Making a mask (if necessary)
@@ -119,7 +121,7 @@ if(tolower(mskng) != "no"){
 
 #### Modelling per each species ####
 specs <- unique(presences$sp2)
-#specs <- unique(presences$sp2)[-c(1:4)]
+#specs <- unique(presences$sp2)[13]
 
 best2_bnd_2exp <- as.data.frame(matrix(ncol = 0, nrow = 0)) # a table to export rankings of best and 2nd best bandwidth
 
@@ -388,29 +390,41 @@ frec_best <- merge(frec_best, frec_best_WithTime, by.x = "V1", by.y = "Var1", al
 frec_best[is.na(frec_best)] <- 0 
 names(frec_best) <- c("BandwidthNum", "Frec_Best_NoTime", "Frec_Best_WithTime")
 
-barchart(Freq ~ Var1, frec_best_NoTime)
-barchart(Freq ~ Var1, frec_best_WithTime)
+perc1 <- round((prop.table(frec_best$Frec_Best_NoTime)*100), 0)
+perc2 <- round((prop.table(frec_best$Frec_Best_WithTime)*100), 0)
+perc <- paste0(c(perc1, perc2), "%")
+maxY <- max(frec_best_NoTime$Freq, frec_best_WithTime$Freq) + 1
+posX <- c(1:num_bands, (num_bands + 2):((2 * (num_bands)) + 1)) - 0.3
+posY <- (maxY / 10 * 0.2) + c(frec_best$Frec_Best_NoTime, frec_best$Frec_Best_WithTime)
+if (maxY <= 5) legY <- -0.4 else legY <- -1.5
 
 palte <- colorRampPalette(colors = c("darkgreen", "green", "yellow", "orange", "red", "darkred"))(num_bands)
 
 pdf(paste0(dir2save, "/BestBandwidths.pdf"))
 par(xpd = TRUE, mar = par()$mar + c(3,1,0,0))
-barplot(as.matrix(frec_best[,c(2:3)]), 
-        main = "Best Bandwidth With and Without Execution Time", ylab = "Frequencies", 
-        ylim = c(0, (max(frec_best_NoTime$Freq, frec_best_WithTime$Freq) + 1)),
-        beside = TRUE, space = c(0.1, 1),
-        col = palte,
-        #names.arg = c(1:10, 1:10),
-        names.arg = c("With Execution Time", "Without Execution Time"),
-        cex.names = 1, las = 1)
-legend((num_bands/2), -1.5, 
-       legend = frec_best$BandwidthNum, 
-       fill = palte,
-       title = "Bandwith Number", cex = 1, ncol = (num_bands/2))
+bpl <- barplot(as.matrix(frec_best[,c(2:3)]),
+               main = "Best Bandwidth With and Without Execution Time", ylab = "Frequencies", 
+               ylim = c(0, maxY),
+               beside = TRUE, space = c(0, 1),
+               col = palte,
+               #names.arg = c(1:10, 1:10),
+               names.arg = c("With Execution Time", "Without Execution Time"),
+               cex.names = 1, las = 1)
+lg <- legend((num_bands/2), legY,
+             legend = frec_best$BandwidthNum, 
+             fill = palte,
+             title = "Bandwith Number", cex = 1, ncol = (num_bands/2))
+txt <- text(x = posX, y = posY, perc, cex = 0.8, pos = 4, srt = 45)
 
 dev.off()
   
-  
+# 
+
+
+
+
+
+
 
 
 
