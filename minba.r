@@ -5,8 +5,7 @@
 ########                          MinBA                        ############
 ########                                                       ############
 ###########################################################################
-
-
+#
 # minba.r
 #
 # Created on: Winter 2018 (under construction)
@@ -22,54 +21,10 @@
 # ------------------------------------------
 #source("~/Google Drive/MinBA/minba.r")
 
-#### packages ####
-options(java.parameters = "-Xmx4g" )
-library(sp)
-library(rgdal)
-library(raster)
-#library(graphics)
-#library(rgeos)
-#dyn.load('/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/server/libjvm.dylib')
-#library(rJava)
-library(dismo)
-library(ecospat)
-library(geosphere)
-library(ENMeval)
-#library(rnaturalearth)
-library(lattice)
-library(latticeExtra)
-# My useful functions
-source("https://raw.githubusercontent.com/xavi-rp/xavi_functions/master/xavi_functions.r")
-
-
-#### Settings ####
-wd <- "~/Google Drive/MinBA"
-setwd(wd)
-dir2save <- paste0(wd, "/minba_20180430")
-dir2save <- paste0(wd, "/minba_20180506")
-dir2save <- paste0(wd, "/minba_", format(Sys.Date(), format="%Y%m%d"))
-if(!file.exists(dir2save)) dir.create(dir2save)
-
-
-# Need to download presence data from GBIF/Bioatles?
-# If != "no", provide a csv with the list of species called "species.csv"
-pres2bdwnld <- "no"
-data_rep <- "gbif"
-data_rep <- "bioatles"
-
-# Resolution
-if (data_rep == "gbif") resol <- 5  # 5 arcmin ~ 4.5 km2
-if (data_rep == "bioatles") resol <- 0.5  # 30 arcsec ~ 1 km2
-
-# Need to download climatic data?
-clim2bdwnld <- "no"
-
-# Number of bands
-num_bands <- 10
-
-# n to calculate Boyce Index average
-n_times <- 3
-
+#### Call settings ####
+source("~/Google Drive/MinBA/minba_00settings.r")
+#dir2save <- paste0(wd, "/minba_20180430")    # Europe, etc
+#dir2save <- paste0(wd, "/minba_20180506")    # Baelarics
 
 #### Retrieving Presence Records ####
 if(tolower(pres2bdwnld) != "no"){
@@ -403,7 +358,7 @@ palte <- colorRampPalette(colors = c("darkgreen", "green", "yellow", "orange", "
 pdf(paste0(dir2save, "/BestBandwidths.pdf"))
 par(xpd = TRUE, mar = par()$mar + c(3,1,0,0))
 bpl <- barplot(as.matrix(frec_best[,c(2:3)]),
-               main = "Best Bandwidth With and Without Execution Time", ylab = "Frequencies", 
+               main = "Best Bandwidth With and Without Execution Time", ylab = paste0("Frequencies (n = ", nrow(best2_bnd_2exp), ")"), 
                ylim = c(0, maxY),
                beside = TRUE, space = c(0, 1),
                col = palte,
@@ -417,104 +372,8 @@ lg <- legend((num_bands/2), legY,
 txt <- text(x = posX, y = posY, perc, cex = 0.8, pos = 4, srt = 45)
 
 dev.off()
-  
 # 
+  
 
+#### Plot with all bandwidth plots ####
 
-
-
-
-
-
-
-
-
-
-
-#### Getting loess (smooth) curve ####
-#  l_curve <- loess(BoyceIndex ~ Bandwidth, dt2exp_mean, span = 0.6)    #span=0.8 is default, for smoothing
-#  l_preds <- stats::predict(l_curve)
-#  plot(l_curve)
-#  l_preds
-#  l_slope <- diff(l_preds)
-#  max_slp <- dt2exp_mean[which.max(l_slope), dt2exp_mean$BoyceIndex]
-  # LOESS (SMOOTH)
-  
-  #DATA
-  set.seed(42)
-  x = rnorm(20)
-  y = rnorm(20)
-  x <- dt2exp_mean$Bandwidth
-  y <- dt2exp_mean$BoyceIndex_part
-  
-  #Plot the points
-  plot(x, y, type = "p", ylim = c(0.8, 1.2))
-  
-  #Obtain points for the smooth curve
-  temp = loess.smooth(x, y, span = 2/3, family = c("symmetric"), evaluation = 200) 
-  temp = loess.smooth(x, y, span = 2/3, family = c("gaussian"), evaluation = 50) 
-  temp = loess.smooth(x, y, span = 0.3, family = c("gaussian"), evaluation = 50) 
-  
-  #Plot smooth curve
-  lines(temp$x, temp$y, lwd = 2, col="green")
-  
-  #Obtain slope of the smooth curve
-  slopes <- diff(temp$y)/diff(temp$x)
-  slopes <- round(slopes, 5)
-  slopes <- ifelse(slopes < 0, NA, slopes)
-  min(slopes, na.rm = TRUE)
-  order(slopes)
-  
-  which(slopes == min(slopes, na.rm = TRUE))
-  temp$x[15] 
-  temp$y[15]
-  temp$x[30] 
-  temp$y[30]
-  slopes[15]
-  
-  #Add a trend line
-  abline(v = temp$x[21], col="pink" )
-  abline(v = temp$x[49], col="green" )
-  abline(v = temp$x[14], col="yellow" )
-  abline(v = temp$x[5], col="red" )
-  abline(v = temp$x[30], col="blue" )
-  abline(h = temp$y[34], col="blue" )
-  abline(lm(y~x))
-  
-  
-  
-  
-  plot(x, y, type = "p", ylim = c(0.8, 1.35))
-  
-  y.loess <- loess(y ~ x, span=0.7, data.frame(x=x, y=y))
-  y.predict <- predict(y.loess, data.frame(x=x))
-  
-  lines(x, y.predict, lwd = 2, col="red")
-  
-  
-  peak <- optimize(function(x, model) predict(model, data.frame(x=x)),
-                   c(min(x),max(x)),
-                   maximum=TRUE,
-                   model=y.loess) 
-  
-  
-  points(peak$maximum,peak$objective, pch=FILLED.CIRCLE<-19)
-  
-  xval <- approx(x = y.predict, y = x, xout = 1)$y    #sembla que és linear
-  spline(x = y.predict, y = x, xout = 1) #nonlinear
-  
-  
-  
-  
-  dev.off()
-  
-} # end of loop for sps
-
-
-
-
-
-
-#plot(bioclim$bio1)
-#plot(pres4model, add=T, col = 2)
-#plot(pres, add=T)
