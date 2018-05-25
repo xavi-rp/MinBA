@@ -1,6 +1,6 @@
 ###########################################################################
 ########                                                       ############
-########               Downloading data from GBIF              ############
+########             Downloading data from Bioatles            ############
 ########                                                       ############
 ########                                                       ############
 ###########################################################################
@@ -12,11 +12,28 @@
 #
 # Created by: Xavier Rotllan-Puig (xavi.rotllan.puig@gmail.com)
 #
-# Description: The aim of this script is to download species (presences) data from the Bioatles
-#              http://bioatles.caib.es  
+# Description: The aim of this script is to define the function bioatles(), which
+#              is used to download species (presences) data 
+#              from the Bioatles http://bioatles.caib.es. As data in Bioatles is 
+#              projected in European Datum 1950 (31N), the function also trensform
+#              it in Lat/Long Geographic Coordinates System WGS84.
+#              bioatles() is based on several functions included in the packages 
+#              "rvest" (Wickham, 2016) and "xml2" (Wickham et al., 2017).
+#              Finally, it saves the data in a csv file.
+#              
+# Inputs:
+#       - The location of a csv file with the names of the species to be downloaded
 # 
-# 
-
+# Outputs:
+#       - A csv file with 3 columns (species, decimalLatitude, decimalLongitude)
+#         
+# References:
+#       - Hadley Wickham (2016). rvest: Easily Harvest (Scrape) Web Pages. R package 
+#         version 0.3.2. https://CRAN.R-project.org/package=rvest
+#       - Hadley Wickham, James Hester and Jeroen Ooms (2017). xml2: Parse XML. R 
+#         package version 1.1.1. https://CRAN.R-project.org/package=xml2
+#              
+#
 # ------------------------------------------
 
 getwd()
@@ -25,11 +42,9 @@ setwd(wd)
 
 #### packages ####
 library(rvest)
-library(stringr)
-library(purrr)
-library(httr)
 library(dplyr)
 library(sp)
+
 
 #### Settings ####
 # Output name of the data set
