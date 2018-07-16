@@ -61,7 +61,7 @@ load("~/Google Drive/GBIF_credentials/gbif_credentials.RData", verbose = TRUE)
 
 # List of species to be downloaded
 specs <- as.vector(read.csv("species.csv", header = FALSE)[,1])
-specs <- toupper(specs)
+#specs <- toupper(specs)
 
 # Output name of the data set
 out_name <- "sp_records"
@@ -72,7 +72,7 @@ out_name <- "sp_records"
 
 for (sps in specs){
   print(paste0("Downloading data for ", sps))
-  rqst_02 <- occ_download(paste0("scientificName = ", sps), "hasCoordinate = TRUE",
+  rqst_02 <- occ_download(paste0("taxonKey = ", name_backbone(name = sps)$speciesKey), "hasCoordinate = TRUE",
                           type = "and", user = gbif_usr, pwd = gbif_pwrd, email = email)    #prepares the spin up
   # Creates metadata
   rqst_02_meta <- data.frame(status = "INITIAL")
@@ -103,6 +103,8 @@ for (sps in specs){
   cat(paste0("Reading data for ", sps), "\n")
   load(paste0("download_info_", sps, ".RData"), verbose = TRUE)
   
+  #name_backbone(name = sps)$speciesKey
+
   # Reading in data
   #load("download_info.RData", verbose = TRUE)
   data02 <- occ_download_import(dta)
