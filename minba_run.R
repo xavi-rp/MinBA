@@ -33,7 +33,10 @@ if(tolower(pres2bdwnld) != "no"){
 }
 
 if (data_rep == "gbif")  presences <- read.csv("gbif_data/sp_records.csv", header = TRUE)
-if (data_rep == "bioatles")  presences <- read.csv("bioatles/sp_records.csv", header = TRUE)
+if (data_rep == "bioatles") {
+  presences <- read.csv("bioatles/sp_records.csv", header = TRUE)
+  presences <- presences[, c(2,1,3,4)]
+} 
 
 colnames(presences)[1:2] <- c("lat", "lon") 
 presences <- presences[, c(2,1,3,4)]
