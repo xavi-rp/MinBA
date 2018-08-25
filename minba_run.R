@@ -215,29 +215,26 @@ for(sps in specs){
       save(byce, file = paste0(path, "/boyce.RData"))
       #load(paste0(path, "/boyce.RData"), verbose = TRUE)
       
-      if(bdw != length(bndwidth)){ #except the last bandwith (it makes no sense repeating predictions/evaluations on the same extent)
+      # In the last bandwidth it would make no sense repeating predictions/evaluations on the same extent
+      # to assess for transferability. However, for the sake of consistency in the execution time, they are 
+      # calculated.
+      # To return to the version where they are not calculated, check commit e6e0040 of 25/08/2018
         
-        ## making predictions on the whole species extent
-        preds1 <- predict(modl, varbles1, filename=paste0(path, "/predictions_tot"), progress='text', overwrite=TRUE)
+      ## making predictions on the whole species extent
+      preds1 <- predict(modl, varbles1, filename=paste0(path, "/predictions_tot"), progress='text', overwrite=TRUE)
+      
+      #make evaluations
+      bg1 <- randomPoints(varbles1, num_bckgr1) # background points
+      evs1 <- evaluate(modl, p=pres4test_tot, a=bg1, x=varbles1)
+      save(evs1, file = paste0(path, "/evaluations_tot.RData"))
+      #load(paste0(path, "/evaluations_tot.RData"), verbose = T)
+      
+      #Computing Boyce Index
+      byce1 <- ecospat.boyce(fit = preds1, obs = pres4test_tot@coords, nclass=0, window.w="default", res=100, PEplot = TRUE)
+      byce1$Spearman.cor
+      save(byce1, file = paste0(path, "/boyce_tot.RData"))
+      #load(paste0(path, "/boyce_tot.RData"), verbose = TRUE)
         
-        #make evaluations
-        bg1 <- randomPoints(varbles1, num_bckgr1) # background points
-        evs1 <- evaluate(modl, p=pres4test_tot, a=bg1, x=varbles1)
-        save(evs1, file = paste0(path, "/evaluations_tot.RData"))
-        #load(paste0(path, "/evaluations_tot.RData"), verbose = T)
-        
-        #Computing Boyce Index
-        byce1 <- ecospat.boyce(fit = preds1, obs = pres4test_tot@coords, nclass=0, window.w="default", res=100, PEplot = TRUE)
-        byce1$Spearman.cor
-        save(byce1, file = paste0(path, "/boyce_tot.RData"))
-        #load(paste0(path, "/boyce_tot.RData"), verbose = TRUE)
-        
-      }else{  # if it is the last bandwidth
-        preds1 <- preds
-        bg1 <- bg
-        evs1 <- evs
-        byce1 <- byce
-      }
       # gathering info to be exported
       t2 <- Sys.time() - t1
       if(attr(t2, "units") == "hours") {t2 <- t2*60; attr(t2, "units") <- "mins"}
@@ -263,6 +260,17 @@ for(sps in specs){
     dt2exp_mean[, c(2:5)] <- data.frame(lapply(dt2exp_mean[c(2:5)], function(x) as.numeric(as.character(x))))
     
     rm(modl, preds, preds1, bg, evs, byce); gc()
+    
+    #Conditions to stop the process
+    if (!is.null(BI_part)){
+      if (BI_part <= dt2exp_m) print("minimum BI_part reached") ; break
+      if (bdw > 2){
+        if (BI_part <= dt2exp_m) print("minimum BI_part reached") ; break
+      }
+    }
+    if (!is.null(BI_tot)){
+      if (BI_tot <= dt2exp_m2) print("minimum BI_tot reached") ; break
+    }
     
 
   } # end of for each bandwidth
