@@ -30,7 +30,8 @@ library(lattice)
 library(latticeExtra)
 # My useful functions
 source("https://raw.githubusercontent.com/xavi-rp/xavi_functions/master/xavi_functions.r")
-
+# To download presences: https://www.researchgate.net/publication/326440673_PreSPickR_Downloading_Species_Presences_Occurrences_From_Public_Repositories
+library(PreSPickR)
 
 #### Settings ####
 wd <- "~/Google Drive/MinBA"
@@ -53,10 +54,23 @@ if (data_rep == "bioatles") resol <- 0.5  # 30 arcsec ~ 1 km2
 
 # Need to download climatic data?
 clim2bdwnld <- "no"
+clim2bdwnld <- "yes"
 
 # Number of bands
 num_bands <- 10
 
 # n to calculate Boyce Index average
 n_times <- 3
+
+# Conditions to stop the modelling proces
+#   If the three are NULL, all bandwidths are preocessed
+#   If one or the two BIs have a value, this or these are the minimum limit to be reached
+#   If SD_BI, this or these are the minimum limit to be reached
+
+SD_BI <- NULL
+BI_tot <- NULL
+BI_part <- NULL
+BI_part <- 0.90
+
+
 

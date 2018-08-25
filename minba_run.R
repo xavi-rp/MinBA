@@ -28,15 +28,17 @@ source("~/Google Drive/MinBA/minba_00settings.r")
 
 #### Retrieving Presence Records ####
 if(tolower(pres2bdwnld) != "no"){
-  if (data_rep == "gbif")  source(paste0(wd, "/gbif_data.r"))
-  if (data_rep == "bioatles")  source(paste0(wd, "/bioatles_data.r"))
+  if (data_rep == "gbif")  PreSPickR:::GetBIF(credentials = "~/gbif_credentials.RData", sp_list = "~/species_gbif.csv", out_name = "sp_records_gbif")
+  if (data_rep == "bioatles")  PreSPickR:::bioatles(sp_list = "~/species_bioatles.csv", out_name = "sp_records_bioatles")
 }
 
-if (data_rep == "gbif")  presences <- read.csv("gbif_data/sp_records.csv", header = TRUE)
+if (data_rep == "gbif")  presences <- read.csv("sp_records_gbif.csv", header = TRUE)
 if (data_rep == "bioatles") {
-  presences <- read.csv("bioatles/sp_records.csv", header = TRUE)
-  presences <- presences[, c(2,1,3,4)]
+  presences <- read.csv("sp_records_bioatles.csv", header = TRUE)
+  presences <- presences[, c(2,1,3)]
 } 
+
+presences$sp2 <- tolower(paste(substr(presences$species, 1, 3), substr(sub(".* ", "", presences$species), 1, 3), sep = "_"))
 
 colnames(presences)[1:2] <- c("lat", "lon") 
 presences <- presences[, c(2,1,3,4)]
@@ -88,6 +90,7 @@ for(sps in specs){
   specs_long <- as.character(unique(pres$species)) # complete name of the species
   pres <- pres[, c(1,2,4)]
   coordinates(pres) <- c("lon", "lat")  # setting spatial coordinates
+  pres@proj4string <- CRS("+init=EPSG:4326")
   #plot(pres)
   
   #### Calculating the centre of the population, its most distant point and "bands" ####
@@ -145,7 +148,7 @@ for(sps in specs){
     ext[2, 2] <- pres4model@bbox[2, 2] + incr[2]
     varbles <- stack(crop(bioclim, ext))
     #dev.off()
-    #plot(varbles$bio1)
+    #plot(varbles$bio2_16)
     #plot(pres, add = TRUE)
     
     # number of background points (see Guevara et al, 2017)
@@ -260,6 +263,7 @@ for(sps in specs){
     dt2exp_mean[, c(2:5)] <- data.frame(lapply(dt2exp_mean[c(2:5)], function(x) as.numeric(as.character(x))))
     
     rm(modl, preds, preds1, bg, evs, byce); gc()
+    
 
   } # end of for each bandwidth
   
