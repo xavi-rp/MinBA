@@ -19,7 +19,7 @@
 
 
 # ------------------------------------------
-#source("~/Google Drive/MinBA/minba.r")
+#source("~/Google Drive/MinBA/minba_run.r")
 
 #### Call settings ####
 source("~/Google Drive/MinBA/minba_00settings.r")
@@ -132,7 +132,7 @@ for(sps in specs){
   #table with info to be exported
   dt2exp <- as.data.frame(matrix(ncol = 12, nrow = 0))
   selfinfo2exp <- as.data.frame(matrix(ncol = 9, nrow = 0))
-  dt2exp_mean <- as.data.frame(matrix(ncol = 5, nrow = 0))
+  dt2exp_mean <- as.data.frame(matrix(ncol = 7, nrow = 0))
   
   for (bdw in 1:length(bndwidth)) { # for each bandwidth
     x <- 1
@@ -175,7 +175,7 @@ for(sps in specs){
     
     repeat{   # maybe it can be done directly with maxent; if so, we would also have the "average-model"
       t1 <- Sys.time()
-      print(paste0("modelling for ", specs_long, " - bandwidth #", bdw, "_", x))
+      cat("\r","modelling for",specs_long,"- bandwidth #",bdw,"_",x)
 
       # Running maxent from dismo 
       if(!file.exists(paste0(dir2save,"/results_", sps))) dir.create(paste0(dir2save,"/results_", sps))
@@ -201,7 +201,7 @@ for(sps in specs){
       if(is.null(modl)){ break }
 
       #making predictions on the same extent
-      preds <- predict(modl, varbles, filename=paste0(path, "/predictions"), progress='text', overwrite=TRUE)
+      preds <- predict(modl, varbles, filename = paste0(path, "/predictions"), progress = '', overwrite = TRUE)
 
       #make evaluations (on the same extent with 30% to test)
       bg <- randomPoints(varbles, num_bckgr) # background points
@@ -221,7 +221,7 @@ for(sps in specs){
       # To return to the version where they are not calculated, check commit e6e0040 of 25/08/2018
         
       ## making predictions on the whole species extent
-      preds1 <- predict(modl, varbles1, filename=paste0(path, "/predictions_tot"), progress='text', overwrite=TRUE)
+      preds1 <- predict(modl, varbles1, filename=paste0(path, "/predictions_tot"), progress = '', overwrite = TRUE)
       
       #make evaluations
       bg1 <- randomPoints(varbles1, num_bckgr1) # background points
@@ -248,34 +248,39 @@ for(sps in specs){
     } #end of repeat n times
     
     if(is.null(modl)){ print("jumping to next bandwidth"); next }
-    
-    print(paste0("computing average for ", specs_long, " - bandwidth #", bdw)) 
+
+    cat("\n","computing average for",specs_long,"- bandwidth #",bdw,"\n")
     dt2exp[,-c(1:6)] <- data.frame(lapply(dt2exp[-c(1:6)], function(x) as.numeric(as.character(x))))
     dt2exp_m <- mean(dt2exp[(nrow(dt2exp)-n_times+1):nrow(dt2exp), (ncol(dt2exp)-4)], na.rm = TRUE) #mean Boyce partial area
     dt2exp_m2 <- mean(dt2exp[(nrow(dt2exp)-n_times+1):nrow(dt2exp), ncol(dt2exp)], na.rm = TRUE) #mean Boyce whole area
+    if (bdw > 3){
+      dt2exp_sd1 <- sd(c(dt2exp_mean$V3[(bdw-3):(bdw-1)], dt2exp_m))
+      dt2exp_sd2 <- sd(c(dt2exp_mean$V4[(bdw-3):(bdw-1)], dt2exp_m2))
+    }else{
+      dt2exp_sd1 <- NA
+      dt2exp_sd2 <- NA
+    }
     selfinfo2exp[,-c(1:8)] <- data.frame(lapply(selfinfo2exp[-c(1:8)], function(x) as.numeric(as.character(x))))
     dt2exp_m1 <- mean(selfinfo2exp[(nrow(selfinfo2exp)-n_times+1):nrow(selfinfo2exp), ncol(selfinfo2exp)], na.rm = TRUE)
-    dt2exp_mean_2 <- as.data.frame(matrix(c(specs_long, bndwidth[bdw], dt2exp_m, dt2exp_m2, dt2exp_m1), 1, 5, byrow = TRUE))
+    dt2exp_mean_2 <- as.data.frame(matrix(c(specs_long, bndwidth[bdw], dt2exp_m, dt2exp_m2, dt2exp_sd1, dt2exp_sd2, dt2exp_m1), 1, 7, byrow = TRUE))
     dt2exp_mean <- rbind(dt2exp_mean, dt2exp_mean_2)
-    dt2exp_mean[, c(2:5)] <- data.frame(lapply(dt2exp_mean[c(2:5)], function(x) as.numeric(as.character(x))))
+    dt2exp_mean[, c(2:7)] <- data.frame(lapply(dt2exp_mean[c(2:7)], function(x) as.numeric(as.character(x))))
     
     rm(modl, preds, preds1, bg, evs, byce); gc()
     
     #Conditions to stop the process
-    if (!is.null(BI_part)){
-      if (BI_part <= dt2exp_m) print("minimum BI_part reached") ; break
-      if (bdw > 2){
-        if (BI_part <= dt2exp_m) print("minimum BI_part reached") ; break
-      }
+    if(!is.null(BI_part) | !is.null(BI_tot) | !is.null(SD_BI_part) | !is.null(SD_BI_tot)){
+      brk <- 0
+      if (!is.null(BI_part) && BI_part <= dt2exp_m){ print("minimum BI_part has been reached"); brk <- 1}
+      if (!is.null(BI_tot) && BI_tot <= dt2exp_m2){ print("minimum BI_tot has been reached"); brk <- 1}
+      if (!is.null(SD_BI_part) && !is.na(dt2exp_sd1) && SD_BI_part >= dt2exp_sd1){ print("minimum SD_BI_part has been reached"); brk <- 1}
+      if (!is.null(SD_BI_tot) && !is.na(dt2exp_sd2) && SD_BI_tot >= dt2exp_sd2){ print("minimum SD_BI_tot has been reached"); brk <- 1}
+      if (brk == 1)  break
     }
-    if (!is.null(BI_tot)){
-      if (BI_tot <= dt2exp_m2) print("minimum BI_tot reached") ; break
-    }
-    
 
   } # end of for each bandwidth
   
-  names(dt2exp_mean) <- c("Species", "Bandwidth", "BoyceIndex_part", "BoyceIndex_tot", "ExecutionTime")
+  names(dt2exp_mean) <- c("Species", "Bandwidth", "BoyceIndex_part", "BoyceIndex_tot", "SD_part", "SD_tot", "ExecutionTime")
   names(dt2exp) <- c("Species", "ModelNum", "Bandwidth", "numPresencesCalib", "numPresencesTest", "numBackground", "AUC_part", "BoyceIndex", "numPresencesTest_tot", "numBackground_tot", "AUC_tot", "BoyceIndex_tot")
   names(selfinfo2exp) <- c("Species", "ModelNum", "num_pres_calib", "num_pres_calib_used", "num_pres_test", "num_pres_test_used", "num_background", "num_bckgrnd_used", "exec_time")
   
@@ -308,12 +313,15 @@ for(sps in specs){
   #dt2exp_mean[,-1] <- data.frame(lapply(dt2exp_mean[-1], function(x) as.numeric(as.character(x))))
   dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")] <- round(dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")], 3)
   pdf(paste0(dir2save, "/results_", sps, "/boyce_bandwidth_", sps, "_part_tot.pdf"))
+  if(nrow(dt2exp_mean) < 5){ tp <- c("p") }else{ tp <- c("p", "smooth") }
   plt <- xyplot(BoyceIndex_part ~ Bandwidth, dt2exp_mean,
                 #scales = list(y = list(log = 10)),
-                type = c("p", "smooth"),
-                span = 0.8,
+                #xavi180825: type = c("p", "smooth"),
+                type = tp,
+                span = 0.8,  
                 #type = c("p", "l"), 
-                ylim = c(0.8, 1.05),
+                #xavi180825: ylim = c(0.8, 1.05),
+                ylim = c(0.45, 1.05),
                 col = "blue",
                 main = bquote(Boyce~Index~(mean~of~.(n_times)~models)~-~italic(.(specs_long))),
                 ylab = "Boyce Index", xlab = "Bandwidth (km)",
@@ -335,7 +343,8 @@ for(sps in specs){
   dbl_plt <- doubleYScale(plt, plt1, add.ylab2 = TRUE)
   #plot(dbl_plt)
   plt2 <- xyplot(BoyceIndex_tot ~ Bandwidth, dt2exp_mean,
-                 type = c("p", "smooth"),
+                 #xavi081825:  type = c("p", "smooth"),
+                 type = tp,
                  span = 0.8,
                  #type = c("p", "l"), 
                  #ylim = c(0.8, 1.05),

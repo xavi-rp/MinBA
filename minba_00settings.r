@@ -54,7 +54,7 @@ if (data_rep == "bioatles") resol <- 0.5  # 30 arcsec ~ 1 km2
 
 # Need to download climatic data?
 clim2bdwnld <- "no"
-clim2bdwnld <- "yes"
+#clim2bdwnld <- "yes"
 
 # Number of bands
 num_bands <- 10
@@ -67,10 +67,17 @@ n_times <- 3
 #   If one or the two BIs have a value, this or these are the minimum limit to be reached
 #   If SD_BI, this or these are the minimum limit to be reached
 
-SD_BI <- NULL
+#SD_min <- 0.006
+
 BI_tot <- NULL
+#BI_tot <- 0.90
 BI_part <- NULL
-BI_part <- 0.90
+#BI_part <- 0.88
+
+SD_BI_part <- NULL
+#SD_BI_part <- 0.04
+SD_BI_tot <- NULL
+
 
 
 
