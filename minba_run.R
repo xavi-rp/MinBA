@@ -82,9 +82,9 @@ if(tolower(mskng) != "no"){
 
 #### Modelling per each species ####
 specs <- unique(presences$sp2)
-#specs <- unique(presences$sp2)[13]
+#specs <- unique(presences$sp2)[12]
 
-best2_bnd_2exp <- as.data.frame(matrix(ncol = 0, nrow = 0)) # a table to export rankings of best and 2nd best bandwidth
+best2_bnd_2exp <- as.data.frame(matrix(ncol = 0, nrow = 0)) # a table to export rankings of best and 2nd best buffer
 
 for(sps in specs){
   pres <- presences[presences$sp2 %in% sps, ] # selecting for species
@@ -113,7 +113,7 @@ for(sps in specs){
   bndwidth <- c(bndwidth[2:(length(bndwidth)-1)], furthest) # Not defined by distance, but by % of presences equally distributed
                                                             # This is particularly useful for very discontinuous distributions (e.g. introduced or invasive species),
                                                             # while not affecting more aggregated populations
-  # by equally distant bandwidths
+  # by equally distant buffers
   #bndwidth <- as.vector(seq(0, furthest, furthest/num_bands))[-1]
   
   #### Croping variables to pres extent  + 5%
@@ -129,15 +129,15 @@ for(sps in specs){
   num_bckgr1 <- (varbles1@ncols * varbles1@nrows) * 50/100 
   
   
-  #### Making models for each bandwidth ####
+  #### Making models for each buffer ####
   #table with info to be exported
   dt2exp <- as.data.frame(matrix(ncol = 12, nrow = 0))
   selfinfo2exp <- as.data.frame(matrix(ncol = 9, nrow = 0))
   dt2exp_mean <- as.data.frame(matrix(ncol = 7, nrow = 0))
   
-  for (bdw in 1:length(bndwidth)) { # for each bandwidth
+  for (bdw in 1:length(bndwidth)) { # for each buffer
     x <- 1
-    # set of presences for modeling within the bandwidth
+    # set of presences for modeling within the buffer
     pres4model <- pres[pres$dist2centr <= bndwidth[bdw], ] 
     
     # croping variables to pres4model extent  + 5%  <-- to fit the model
@@ -160,7 +160,7 @@ for(sps in specs){
     #}
     
     
-    # sampling presences for calibrating and testing (70-30%) within the bandwidth
+    # sampling presences for calibrating and testing (70-30%) within the buffer
     folds <- sample(1:nrow(pres4model), nrow(pres4model)*0.7)  
     samp <- as.numeric(unlist(folds))
     pres4cali <- pres4model[samp, 1]
@@ -176,7 +176,7 @@ for(sps in specs){
     
     repeat{   # maybe it can be done directly with maxent; if so, we would also have the "average-model"
       t1 <- Sys.time()
-      cat("\r","modelling for",specs_long,"- bandwidth #",bdw,"_",x)
+      cat("\r","modelling for",specs_long,"- buffer #",bdw,"_",x)
 
       # Running maxent from dismo 
       if(!file.exists(paste0(dir2save,"/results_", sps))) dir.create(paste0(dir2save,"/results_", sps))
@@ -216,7 +216,7 @@ for(sps in specs){
       save(byce, file = paste0(path, "/boyce.RData"))
       #load(paste0(path, "/boyce.RData"), verbose = TRUE)
       
-      # In the last bandwidth it would make no sense repeating predictions/evaluations on the same extent
+      # In the last buffer it would make no sense repeating predictions/evaluations on the same extent
       # to assess for transferability. However, for the sake of consistency in the execution time, they are 
       # calculated.
       # To return to the version where they are not calculated, check commit e6e0040 of 25/08/2018
@@ -248,9 +248,9 @@ for(sps in specs){
       if (x == n_times){ break }else{ x <- x +1 }
     } #end of repeat n times
     
-    if(is.null(modl)){ print("jumping to next bandwidth"); next }
+    if(is.null(modl)){ print("jumping to next buffer"); next }
 
-    cat("\n","computing average for",specs_long,"- bandwidth #",bdw,"\n")
+    cat("\n","computing average for",specs_long,"- buffer #",bdw,"\n")
     dt2exp[,-c(1:6)] <- data.frame(lapply(dt2exp[-c(1:6)], function(x) as.numeric(as.character(x))))
     dt2exp_m <- mean(dt2exp[(nrow(dt2exp)-n_times+1):nrow(dt2exp), (ncol(dt2exp)-4)], na.rm = TRUE) #mean Boyce partial area
     dt2exp_m2 <- mean(dt2exp[(nrow(dt2exp)-n_times+1):nrow(dt2exp), ncol(dt2exp)], na.rm = TRUE) #mean Boyce whole area
@@ -279,10 +279,10 @@ for(sps in specs){
       if (brk == 1)  break
     }
 
-  } # end of for each bandwidth
+  } # end of for each buffer
   
-  names(dt2exp_mean) <- c("Species", "Bandwidth", "BoyceIndex_part", "BoyceIndex_tot", "SD_part", "SD_tot", "ExecutionTime")
-  names(dt2exp) <- c("Species", "ModelNum", "Bandwidth", "numPresencesCalib", "numPresencesTest", "numBackground", "AUC_part", "BoyceIndex", "numPresencesTest_tot", "numBackground_tot", "AUC_tot", "BoyceIndex_tot")
+  names(dt2exp_mean) <- c("Species", "Buffer", "BoyceIndex_part", "BoyceIndex_tot", "SD_part", "SD_tot", "ExecutionTime")
+  names(dt2exp) <- c("Species", "ModelNum", "Buffer", "numPresencesCalib", "numPresencesTest", "numBackground", "AUC_part", "BoyceIndex", "numPresencesTest_tot", "numBackground_tot", "AUC_tot", "BoyceIndex_tot")
   names(selfinfo2exp) <- c("Species", "ModelNum", "num_pres_calib", "num_pres_calib_used", "num_pres_test", "num_pres_test_used", "num_background", "num_bckgrnd_used", "exec_time")
   
   computing_ranks <- 1
@@ -299,10 +299,10 @@ for(sps in specs){
                    row.names(dt2exp_mean[dt2exp_mean$rankFinalWithTime == 1, ]), 
                    row.names(dt2exp_mean[dt2exp_mean$rankFinalWithTime == 2, ]))
     best2_bnd <- as.data.frame(t(best2_bnd))
-    names(best2_bnd) <- c("Species", "Best_Bandwidth_NoTime", "SecondBest_bandwidth_NoTime", "Best_Bandwidth_WithTime", "SecondBest_bandwidth_WithTime")
+    names(best2_bnd) <- c("Species", "Best_Buffer_NoTime", "SecondBest_Buffer_NoTime", "Best_Buffer_WithTime", "SecondBest_Buffer_WithTime")
     
     best2_bnd_2exp <- rbind(best2_bnd_2exp, best2_bnd)
-    write.csv(best2_bnd_2exp, paste0(dir2save, "/rankingBestBandwidth.csv"), row.names = FALSE)
+    write.csv(best2_bnd_2exp, paste0(dir2save, "/rankingBestBuffer.csv"), row.names = FALSE)
   }
   
   write.csv(dt2exp_mean, paste0(dir2save, "/results_", sps, "/info_mod_means_", sps, ".csv"), row.names = FALSE)
@@ -313,9 +313,9 @@ for(sps in specs){
   graphics.off()
   #dt2exp_mean[,-1] <- data.frame(lapply(dt2exp_mean[-1], function(x) as.numeric(as.character(x))))
   dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")] <- round(dt2exp_mean[,names(dt2exp_mean) %in% c("BoyceIndex_part", "BoyceIndex_tot")], 3)
-  pdf(paste0(dir2save, "/results_", sps, "/boyce_bandwidth_", sps, "_part_tot.pdf"))
+  pdf(paste0(dir2save, "/results_", sps, "/boyce_buffer_", sps, "_part_tot.pdf"))
   if(nrow(dt2exp_mean) < 5){ tp <- c("p") }else{ tp <- c("p", "smooth") }
-  plt <- xyplot(BoyceIndex_part ~ Bandwidth, dt2exp_mean,
+  plt <- xyplot(BoyceIndex_part ~ Buffer, dt2exp_mean,
                 #scales = list(y = list(log = 10)),
                 #xavi180825: type = c("p", "smooth"),
                 type = tp,
@@ -325,7 +325,7 @@ for(sps in specs){
                 ylim = c(0.45, 1.05),
                 col = "blue",
                 main = bquote(Boyce~Index~(mean~of~.(n_times)~models)~-~italic(.(specs_long))),
-                ylab = "Boyce Index", xlab = "Bandwidth (km)",
+                ylab = "Boyce Index", xlab = "Buffer (km)",
                 #par.settings = list(par.ylab.text = list(col = "black")),
                 #par.settings = simpleTheme(col = 1),
                 key=list(#space = "right",
@@ -333,7 +333,7 @@ for(sps in specs){
                          lines = list(col=c("blue", "green", "magenta")),
                          text = list(c("Boyce Index Partial","Boyce Index Total", "Execution Time"))
                 ))
-  plt1 <- xyplot(ExecutionTime ~ Bandwidth, dt2exp_mean,
+  plt1 <- xyplot(ExecutionTime ~ Buffer, dt2exp_mean,
                  #type = c("p", "smooth"), 
                  type = c("p", "r"), 
                  #ylim = c(0.8, 1.05),
@@ -343,7 +343,7 @@ for(sps in specs){
                  )
   dbl_plt <- doubleYScale(plt, plt1, add.ylab2 = TRUE)
   #plot(dbl_plt)
-  plt2 <- xyplot(BoyceIndex_tot ~ Bandwidth, dt2exp_mean,
+  plt2 <- xyplot(BoyceIndex_tot ~ Buffer, dt2exp_mean,
                  #xavi081825:  type = c("p", "smooth"),
                  type = tp,
                  span = 0.8,
@@ -358,17 +358,17 @@ for(sps in specs){
 
 #
 
-#### Frequences of Best bandwidth #### 
+#### Frequences of Best Buffer #### 
 
-best2_bnd_2exp <- read.csv(paste0(dir2save, "/rankingBestBandwidth.csv"), header = TRUE)
-frec_best_NoTime <- as.data.frame(table(best2_bnd_2exp$Best_Bandwidth_NoTime))
-frec_best_WithTime <- as.data.frame(table(best2_bnd_2exp$Best_Bandwidth_WithTime))
+best2_bnd_2exp <- read.csv(paste0(dir2save, "/rankingBestBuffer.csv"), header = TRUE)
+frec_best_NoTime <- as.data.frame(table(best2_bnd_2exp$Best_Buffer_NoTime))
+frec_best_WithTime <- as.data.frame(table(best2_bnd_2exp$Best_Buffer_WithTime))
 
 frec_best <- as.data.frame(matrix(seq(1:num_bands), nrow = num_bands, ncol = 1))
 frec_best <- merge(frec_best, frec_best_NoTime, by.x = "V1", by.y = "Var1", all = TRUE)
 frec_best <- merge(frec_best, frec_best_WithTime, by.x = "V1", by.y = "Var1", all = TRUE)
 frec_best[is.na(frec_best)] <- 0 
-names(frec_best) <- c("BandwidthNum", "Frec_Best_NoTime", "Frec_Best_WithTime")
+names(frec_best) <- c("BufferNum", "Frec_Best_NoTime", "Frec_Best_WithTime")
 
 perc1 <- round((prop.table(frec_best$Frec_Best_NoTime)*100), 0)
 perc2 <- round((prop.table(frec_best$Frec_Best_WithTime)*100), 0)
@@ -380,25 +380,53 @@ if (maxY <= 5) legY <- -0.4 else legY <- -1.5
 
 palte <- colorRampPalette(colors = c("darkgreen", "green", "yellow", "orange", "red", "darkred"))(num_bands)
 
-pdf(paste0(dir2save, "/BestBandwidths.pdf"))
+#pdf(paste0(dir2save, "/BestBuffers.pdf"))
+png(paste0(dir2save, "/BestBuffers.png"))
 par(xpd = TRUE, mar = par()$mar + c(3,1,0,0))
 bpl <- barplot(as.matrix(frec_best[,c(2:3)]),
-               main = "Best Bandwidth With and Without Execution Time", ylab = paste0("Frequencies (n = ", nrow(best2_bnd_2exp), ")"), 
+               main = "Best Buffer With and Without Execution Time", ylab = paste0("Frequencies (n = ", nrow(best2_bnd_2exp), ")"), 
                ylim = c(0, maxY),
                beside = TRUE, space = c(0, 1),
                col = palte,
                #names.arg = c(1:10, 1:10),
-               names.arg = c("With Execution Time", "Without Execution Time"),
+               names.arg = c("Without Execution Time", "With Execution Time"),
                cex.names = 1, las = 1)
 lg <- legend((num_bands/2), legY,
-             legend = frec_best$BandwidthNum, 
+             legend = frec_best$BufferNum, 
              fill = palte,
-             title = "Bandwidth Number", cex = 1, ncol = (num_bands/2))
+             title = "Buffer Number", cex = 1, ncol = (num_bands/2))
 txt <- text(x = posX, y = posY, perc, cex = 0.8, pos = 4, srt = 45)
 
 dev.off()
 # 
   
 
-#### Plot with all bandwidth plots ####
+#### Plot with all buffer plots ####
+
+
+
+#### BI by groups ####
+
+dt2exp_mean_all <- as.data.frame(matrix(ncol = 0, nrow = 0))
+
+for (sps in specs){
+  dt2exp_mean <- read.csv(paste0(dir2save, "/results_", sps, "/info_mod_means_", sps, ".csv"), header = TRUE)[, 1:4]
+  dt2exp_mean_all <- rbind(dt2exp_mean_all, dt2exp_mean)
+}
+
+BI_SD_bySpecies <- as.data.frame(dt2exp_mean_all %>% group_by(Species) %>% summarise(Mean_BI_part = mean(BoyceIndex_part),
+                                                                                     SD_BI_part = sd(BoyceIndex_part),
+                                                                                     Mean_BI_tot = mean(BoyceIndex_tot),
+                                                                                     SD_BI_tot = sd(BoyceIndex_tot)))
+BI_SD_bySpecies
+range(BI_SD_bySpecies$Mean_part)
+range(BI_SD_bySpecies$SD_part)
+range(BI_SD_bySpecies$Mean_tot)
+range(BI_SD_bySpecies$SD_tot)
+
+
+
+#### Saving Environment Objects ####
+
+save.image(file = "minba_env.RData")
 
