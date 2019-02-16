@@ -24,10 +24,10 @@ library(raster)
 library(dismo)
 library(ecospat)
 library(geosphere)
-library(ENMeval)
-#library(rnaturalearth)
 library(lattice)
 library(latticeExtra)
+#library(ENMeval)
+#library(rnaturalearth)
 # My useful functions
 source("https://raw.githubusercontent.com/xavi-rp/xavi_functions/master/xavi_functions.r")
 # To download presences: https://www.researchgate.net/publication/326440673_PreSPickR_Downloading_Species_Presences_Occurrences_From_Public_Repositories
@@ -37,7 +37,7 @@ library(PreSPickR)
 wd <- "~/Google Drive/MinBA"
 setwd(wd)
 dir2save <- paste0(wd, "/minba_20180430")    # Europe, etc
-dir2save <- paste0(wd, "/minba_20180506")    # Baelarics
+dir2save <- paste0(wd, "/minba_20180825_balears")    # Baelarics
 dir2save <- paste0(wd, "/minba_", format(Sys.Date(), format="%Y%m%d"))
 if(!file.exists(dir2save)) dir.create(dir2save)
 
@@ -56,14 +56,14 @@ if (data_rep == "bioatles") resol <- 0.5  # 30 arcsec ~ 1 km2
 clim2bdwnld <- "no"
 #clim2bdwnld <- "yes"
 
-# Number of bands
+# Number of buffers
 num_bands <- 10
 
 # n to calculate Boyce Index average
 n_times <- 3
 
 # Conditions to stop the modelling proces
-#   If the three are NULL, all bandwidths are preocessed
+#   If the three are NULL, all buffers are preocessed
 #   If one or the two BIs have a value, this or these are the minimum limit to be reached
 #   If SD_BI, this or these are the minimum limit to be reached
 

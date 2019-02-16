@@ -66,6 +66,7 @@ if(tolower(clim2bdwnld) != "no"){
                           path = paste0(wd))  # importing tile 16
     bioclim <- bioclim_16
     save(bioclim, file = "wc0.5/wc05.RData")
+    rm(bioclim_16) ; gc()
   }
 }
 if (data_rep == "gbif")  load(paste0(wd, "/wc5/wc5.RData"), verbose = FALSE)
@@ -392,7 +393,7 @@ bpl <- barplot(as.matrix(frec_best[,c(2:3)]),
 lg <- legend((num_bands/2), legY,
              legend = frec_best$BandwidthNum, 
              fill = palte,
-             title = "Bandwith Number", cex = 1, ncol = (num_bands/2))
+             title = "Bandwidth Number", cex = 1, ncol = (num_bands/2))
 txt <- text(x = posX, y = posY, perc, cex = 0.8, pos = 4, srt = 45)
 
 dev.off()
