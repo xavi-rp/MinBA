@@ -1,0 +1,196 @@
+---
+title: "DETERMINING THE MINIMAL BACKGROUND AREA FOR SPECIES DISTRIBUTION MODELS: MinBAR PACKAGE"
+author: "Xavier Rotllan-Puig & Anna Traveset(??)"
+date: ""
+output: 
+  word_document:
+    reference_docx: MinBA_MS_styles.docx
+bibliography: exportlist_1.bib
+csl: methods-in-ecology-and-evolution.csl
+#csl: ecological-modelling.csl
+---
+
+```{r setup, include = FALSE, results='asis'}
+library(knitr)
+library(pander)
+library(captioner)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include = FALSE}
+load("/Users/xavi/Google Drive/MinBA/minba_env.RData")
+
+table_num <- captioner::captioner(prefix = "Table")
+fig_num <- captioner::captioner(prefix = "Figure")
+
+ts <- 0
+```
+
+
+#Abstract
+1. One of the crucial choices when modelling species distributions using pseudo-absences approaches is the delineation of the background area to fit the model. We hypothesise that there is a minimum background area around the centre of the species distribution that characterizes well enough the range of environmental conditions needed by the species to survive. Thus, fitting the model within this area should be the optimal solution in terms of both quality of the model and execution time.
+2. MinBAR is an R package that calculates the optimal background area. The version 1.0.0 is implemented for MaxEnt and uses Boyce Index as a metrics to assess models performance.
+3. Two case studies are presented to assess the hypothesis and to illustrate the package. 
+4. Partial models trained with part of the species distribution often perform better than those fitted on the entire extension. MinBAR is a versatile tool that helps modellers to objectively define the optimal solution.
+
+
+#Introduction
+Species distribution modelling (SDM) has become an essential tool in the fields of ecology and biodiversity conservation. Its popularity, among other reasons, is due to the ease of use of software such as MaxEnt [@RN6360] or BIOMOD [@RN6579], but also because of the development of the R-programming community and the free availability of biodiversity data in public repositories like GBIF (https://www.gbif.org/). However, such data is often limited to species presences only and with a lack of occurrences in poorly sampled areas. These facts limit the use of some techniques or algorithms and force to make critical assumptions and choices, which introduce different levels of uncertainty to model predictions [@RN3975]. 
+
+One of the crucial choices when using pseudo-absences approaches is the delineation of the background area to fit the model, also called “landscape of interest” or “study area” [@RN6315; @RN4759]. However, it is not clear how to define its extent. Elith et al. [-@RN6315], for instance, said that it has to be defined by the ecologist and limited by geographic boundaries or by how far the species can be dispersed. Other authors also included as constraints the interactions with other species or sampling biases in the data set [@RN3975]. Despite that, there are still some situations in which it is difficult to define exactly an accurate background area, often due either to the limited knowledge of the species biology or to the lack of available data. In addition, it is also common that the study is focused in a country or region. Then, the background area is constrained to an artificial or political boundary, although the species distribution might be wider [@RN5265]. Finally, another difficult situation is when the extent of the species is so big that makes computations to fit the model and generate predictions highly resource-demanding and time-consuming. These limitations are particularly important when the study encompasses a big number of species with a large geographic range. Any of these situations usually lead to fit partial models, which might or might not suppose a reduction of model performance [@RN5265].
+
+Therefore, the hypothesis of this work is that there is a minimum background area around the centre of the species distribution (minimum buffer) that characterizes well enough the range of environmental conditions needed by the species to survive. Thus, fitting the SDM within this area should be the optimal solution in terms of both quality of the model and execution time. 
+ 
+#MinBAR overview
+MinBAR is an R package that aims at (1) defining what is the minimum or optimal background extent necessary to fit good partial SDMs and/or (2) determining whether the background area used to fit a partial SDM is reliable enough to extract ecologically relevant conclusions from it.
+
+##Problem
+On the one hand, fitting partial SDMs might lead to underestimated predictions of species’ distribution or to biased descriptions of their niches [@RN4756]. On the other hand, making model calibrations and predictions of species with a large geographic range can demand a huge amount of computer resources in terms of time and memory.
+
+To solve these problems, the idea behind the MinBAR package is to sequentially fit several concentric SDMs, with different diameter each (i.e. buffers), from the centre of the species distribution to the periphery, until a satisfactory model is reached.
+
+##Evaluation metrics
+A certain controversy exists about the best way to evaluate the performance of SDMs. One of the most widely used metrics is the AUC or area under the receiver operating characteristic (ROC) curve, although it has received several critiques because of its misuse [@RN6689]. In particular, for the purpose of MinBAR, AUC is not the best choice because its scores are highly influenced by the defined background area, then it is only useful for assessing the performance of different models with exactly the same extent. For that reason, this package uses the Boyce Index [@RN5422], implemented in the R package *ecospat* [@RN2970]. However, AUC is also calculated and gathered in the outputs, although it is not used to derive conclusions. 
+
+Boyce Index (BI) is a presence-only and threshold-independent evaluator for SDMs. Among others, it is adequate in situations where the model uses background data instead of true absences, as is the case of MaxEnt [@RN2970]. It varies between -1 and 1, where positive values indicate consistent model predictions; values close to zero indicate predictions not better than those from a random model; and negative values imply bad predictions. See Hirzel et al. [-@RN5422] and Di Cola et al. [-@RN2970] for further details on how BI is calculated as well as its strengths and weaknesses.
+
+In order to evaluate the predictive performance of the models, this package includes two different metrics. On the one hand, Boyce Index Partial (BI_part) evaluates the accuracy of predictions within the buffer, or what is the same, in the training area. On the other hand, Boyce Index Total (BI_tot) assesses predictions beyond the training area, across the whole distribution of the species (i.e. transferability of the model).
+
+##*minba*: The main function
+The main function of MinBAR is *minba*. In the version 1.0.0 of the package presented here, *minba* is implemented for MaxEnt models. 
+
+This function firstly loads the presences data set and the explanatory variables. Secondly, it calculates the centre of the species distribution, the most distant occurrence and the buffers. The buffers are not defined by equal distance, but by % of presences equally distributed. This is particularly useful for very discontinuous distributions (e.g. introduced or invasive species), while not affecting more aggregated populations. 
+
+Thirdly, *minba* makes *n* models for each buffer in a loop and calculates averages. In this step, it crops the variables to the extent of the buffer +5%, and calculates the number of necessary pseudo-absences to cover the 50% of the pixels within the buffer [@RN6686]. It uses 70% of the presences to calibrate the model and 30% for evaluation, all from within the buffer (Boyce Index Partial). It also makes predictions and evaluations for the whole extent of the species +5% (Boyce Index Total). For this assessment, it uses 30% of all presences excluding those used to calibrate the model.
+
+At this point, the user can choose either (1) to run the models for all the buffers to see if the selected background area is accurate and how the quality of the models evolves, or (2) to stop the process when it reaches certain conditions, which can be defined by the user as well. The latter option is adequate for very large species distributions. In this case, the user also has several options, mainly depending in the aim of the study. On the one hand, if the interest is related to the characteristics of the population (e.g. description of the ecological niche, etc.), the focus should be more in the Boyce Index Partial. On the other hand, if the model wants to be projected in time or space, the focus should fall on the Boyce Index Total. In turn, both approaches have two possibilities: either (a) fixing a minimum Boyce Index to stop the process when it is reached; or (b) to automatically stop it when the standard deviation (SD) of the last four calculated buffer’s Boyce Index is small. Thus, the user has four arguments (i.e. BI_part, BI_tot, SD_BI_part and SD_BI_tot) to pass to *minba* in order to define how to proceed. BI_part and BI_tot accept two possibilities: either *NULL* (default), which deactivates the condition, or a number below 1 (it makes no sense a higher BI), which establish the minimum limit. Similarly, SD_BI_part and SD_BI_tot accept *NULL* (default) to deactivate the condition, or a number to establish the minimum SD. After checking the results of the case studies presented in this document (see below), a recommended minimum SD could be 0.006. Therefore, there are several combinations to choose from. For instance, if all four arguments are *NULL* (default), all buffers are modelled; alternatively, if both BI_par and BI_tot are defined as a number, and so are SD_BI_part and SD_BI_tot, the process stops when the first of them is reached. Any combination of them is allowed.
+
+```{r echo=FALSE}
+#MinBAR:::minba(occ = "sp_records_gbif.csv", 
+#               varbles = "wc5", 
+#               prj = "4326", num_bands = 10, n_times = 3,
+#               BI_part = NULL, BI_tot = NULL,
+#               SD_BI_part = NULL, SD_BI_tot = NULL)
+#
+```
+ 
+##Outputs
+`r ts = ts + 1`
+At the end of the modelling process, *minba* outputs different information in form of tables and charts to let the user know the optimal buffer.
+
+It writes out three tables in *csv* files: *selfinfo_mod_*, *info_mod_* and *info_mod_means_*  (all followed by the name of the species). The first two tables are merely informative about how the modelling process has been developed and the results of each model. Whereas *info_mod_means_* shows the means of the *n* models run for each buffer. See Table S`r ts` in Supplementary Material as an example of *info_mod_means_*. It contains the Boyce Index Partial, the Boyce Index Total and the execution time. Additionally, it also has columns with rankings of the buffer derived from these three metrics, plus two more ranking columns: *rankFinalNoTime* and *rankFinalWithTime*, which ranks for the best buffer with and without taking into account the execution time, respectively.
+
+Finally, *minva* draws scatterplots, smoothed by fitting a Loess regression curve, of the two BI to show the evolution of them with the increase of the buffer diameter in kilometres. It also plots the execution time by fitting a linear regression model.
+
+
+#Implementation (Case Studies)
+To assess the hypothesis formulated at the beginning of this article about the existence of an optimal background area, we developed two different case studies. 
+
+For each case we selected several common plant species of different typology (i.e. herbaceous, shrubs, broad-leaved trees, conifers). The function *minba*, by default, defines 10 buffers, with 3 model replicates per buffer, and lets the process produce models for all of them. Running it so, it can be appreciated the evolution of the metrics along the different buffers. MaxEnt was run with the default parameters, except for the number of background points. The intention of that was to limit interferences in the results as much as possible for all the species. We used 19 climatic variables available from WorldClim at different resolutions for each case of study. Equally, we downloaded the occurrences of the species from public repositories by means of the PreSPickR package [@RN6687].
+
+All the R scripts used in these case studies, including the code for the generation of the manuscript, can be found in https://github.com/xavi-rp/MinBA. In turn, the source code of the MinBAR package can be downloaded from https://github.com/xavi-rp/MinBAR.
+
+##Case 1: Entire distribution
+```{r echo=FALSE}
+rnk_best_eur <- read.csv(paste0(wd, "/minba_20180430/rankingBestBandwidth.csv"), header = TRUE)
+names(rnk_best_eur) <- gsub("andwidth", "uffer", names(rnk_best_eur))
+
+tb1 <- table_num(name = "t1", caption = "Best and second best buffer with and without taking into account execution time, for each species in Case Study 1")
+
+fig2 <- fig_num(name = "f2", caption = "Evolution of Boyce Index Total (green) and Parcial (blue) and the execution time in minutes (pink) for Fraxinus excelsior")
+
+fig3 <- fig_num(name = "f3", caption = "Evolution of Boyce Index Total (green) and Parcial (blue) and the execution time in minutes (pink) for Linaria alpina")
+
+fig1 <- fig_num(name = "f1", caption = "Frequencies of best buffer with and without taking into account execution time in Case Study 1")
+
+ts <- ts + 1
+```
+
+We modelled `r nrow(rnk_best_eur)` species native from Eurasia and North of Africa (see the list in Supplementary Material Table S`r ts`.1). The presences were downloaded from GBIF. We discarded those occurrences out of the native areas as they were introduced, and this was out of the scope of this case study.
+
+The output graphs produced by *minba* for *Fraxinus excelsior* and *Linaria alpina* can be seen in `r fig_num("f2", display = "cite")` and `r fig_num("f3", display = "cite")`, respectively. Both BI_tot and BI_part for the two species did not improve very much when increasing the buffers after the second one. A similar pattern was seen for almost all the species studied (see all plots in Supplementary Material S`r ts + 1`). Actually, the results (`r table_num("t1", display = "cite")`, `r fig_num("f1", display = "cite")`) showed that the best models for most of the species were those fitted with only part of their distribution, both taking into account the execution time (96%) and not doing it (72%).
+
+##Case 2: Partial distribution on islands
+```{r echo=FALSE}
+rnk_best_eur_1 <- read.csv("minba_20180825_balears/rankingBestBandwidth.csv", header = TRUE)
+names(rnk_best_eur_1) <- gsub("andwidth", "uffer", names(rnk_best_eur_1))
+
+tb2 <- table_num(name = "t2", caption = "Best and second best buffer with and without taking into account execution time, for each species in Case Study 2")
+
+fig5 <- fig_num(name = "f5", caption = "Evolution of Boyce Index Total (green) and Parcial (blue) and the execution time in minutes (pink) for Arbutus unedo")
+
+fig6 <- fig_num(name = "f6", caption = "Evolution of Boyce Index Total (green) and Parcial (blue) and the execution time in minutes (pink) for Asphodelus aestivus")
+
+fig4 <- fig_num(name = "f4", caption = "Frequencies of best buffer with and without taking into account execution time in Case Study 2")
+
+```
+
+We modelled the distribution of `r nrow(rnk_best_eur_1)` species on the Balearic Islands (Western Mediterranean), although their native distribution also includes other continental areas (see the list in Supplementary Material Table S`r ts`.2). The occurrences were downloaded from Bioatles (http://bioatles.caib.es). 
+
+The output graphs produced by *minba* for *Arbutus unedo* and *Asphodelus aestivus* can be seen in `r fig_num("f5", display = "cite")` and `r fig_num("f6", display = "cite")`, respectively. Both BI_tot and BI_part for the two species did not improve very much when increasing the buffers after the first half, and a similar pattern was seen for almost all the species studied (see all plots in Supplementary Material S`r ts + 2`). Furthermore, BI_tot for *A. aestivus* continously decreassed after the second buffer. The results (`r table_num("t2", display = "cite")`, `r fig_num("f4", display = "cite")`) also showed that the best models for most of the species were those fitted with only part of their distribution, specially taking into account the execution time (86%) but also not doing it (57%).
+
+
+#Conclusions
+The package MinBAR has been developed, so far, to work with MaxEnt. It includes the Boyce Index as the main evaluator of the models predictive performance. In coming versions, however, it would be interesting to include other threshold-dependent evaluators based on sensitivity and specificity, as well as the option to pass arguments to the *maxent* function, or to decide the centre from where to start delimiting buffers for modelling. In addition, the inclusion of an index that would take into account at the same time the accuracy in the training area and after transferring to further areas, such as the one described by Duque-Lazo et al. [-@RN5877], might also be quite useful for the users. Furthermore, the implementation of other algorithms and modelling techniques would be highly convenient. 
+
+In conclusion, delimiting the background area can strongly affect the results of SDMs [@RN5949]. However, it is generally difficult to define this extent accurately because the biological information required is often incomplete or unavailable [@RN6175; @RN6276]. In both case studies presented in this document it can be seen how the model including the presences from all the species distribution does not always perform the best. Therefore, here we present a tool to help modellers to objectively define an optimal solution.
+
+
+#Acknowledgements
+
+#####pagebreak
+
+#Tables
+
+```{r echo=FALSE}
+pander(rnk_best_eur,
+       split.cells = c(7, 12, 12, 12, 12),
+       col.names = c("Species", "Best Buffer No-Time", "2nd Buffer No-Time", "Best Buffer With-Time", "2nd Buffer With-Time"),
+       caption = tb1
+       )
+
+```
+
+\newline
+\newline
+
+```{r echo=FALSE}
+pander(rnk_best_eur_1,
+       split.cells = c(7, 12, 12, 12, 12),
+       col.names = c("Species", "Best Buffer No-Time", "2nd Buffer No-Time", "Best Buffer With-Time", "2nd Buffer With-Time"),
+       caption = tb2
+       )
+
+```
+
+
+#####pagebreak
+
+#Figures
+
+![`r fig2`](/Users/xavi/Google Drive/MinBA/minba_20180430/results_fra_exc/boyce_buffer_fra_exc_part_tot.png)
+
+
+![`r fig3`](/Users/xavi/Google Drive/MinBA/minba_20180430/results_lin_alp/boyce_buffer_lin_alp_part_tot.png)
+
+
+![`r fig1`](/Users/xavi/Google Drive/MinBA/minba_20180430/BestBuffers.png)
+
+![`r fig5`](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/results_arb_une/boyce_bandwidth_arb_une_part_tot.png)
+
+
+![`r fig6`](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/results_asp_aes/boyce_bandwidth_asp_aes_part_tot.png)
+
+
+![`r fig4`](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/BestBandwidths.png)
+
+
+
+
+#####pagebreak
+
+#References
+
+
+
+

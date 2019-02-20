@@ -1,0 +1,131 @@
+---
+title: "DETERMINING THE MINIMAL BACKGROUND AREA FOR SPECIES DISTRIBUTION MODELS: MinBAR PACKAGE. SUPPLEMENTARY MATERIAL"
+author: "Xavier Rotllan-Puig & Anna Traveset(?)"
+date: ""
+output: 
+  word_document:
+    reference_docx: MinBA_MS_styles.docx
+---
+
+```{r setup, include = FALSE, results='asis'}
+library(knitr)
+library(pander)
+library(captioner)
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r echo=FALSE}
+t1 <- 0
+```
+
+
+#Introduction
+
+This is the Supplementary Material to the article “Determining the minimal background area for MaxEnt species distribution models: MinBAR package”, published as a pre-print in BioRxiv with the DOI: 
+
+
+#Supplementary Material S`r t1 <- t1 + 1; t1`
+
+```{r echo=FALSE}
+info_mod_means <- read.csv(paste0("/Users/xavi/Google Drive/MinBA", "/minba_20180430/results_pru_spi/info_mod_means_pru_spi.csv"), header = TRUE)
+names(info_mod_means) <- gsub("andwidth", "uffer", names(info_mod_means))
+
+pander(info_mod_means,
+       caption = paste0("Table S", t1, ": Example of an output of MinBAR. Buffer in km."),
+       justify = c('left'))
+```
+
+
+
+#Supplementary Material S`r t1 <- t1 + 1; t1`
+
+```{r echo=FALSE}
+
+sp_list_1 <- read.csv("/Users/xavi/Google Drive/MinBA/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 1:2]
+pander(sp_list_1,
+       caption = paste0("Table S", t1, ".1: List of species used in case study 1"),
+       justify = c('left'))
+```
+
+\newline 
+\newline 
+\newline 
+
+```{r echo=FALSE}
+sp_list_2 <- read.csv("/Users/xavi/Google Drive/MinBA/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 3:4]
+pander(sp_list_2,
+       caption = paste0("Table S", t1, ".2: List of species used in case study 2"),
+       justify = c('left'))
+```
+
+
+#####pagebreak
+#Supplementary Material S`r t1 <- t1 + 1; t1`
+
+Figures S`r t1`.1 - S`r t1`.25: Evolution of Boyce Index Total (green) and Parcial (blue), and the execution time in minutes (pink), for all the species in Case Study 1
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_pin_syl/boyce_buffer_pin_syl_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_que_ile/boyce_buffer_que_ile_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_fag_syl/boyce_buffer_fag_syl_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_fra_exc/boyce_buffer_fra_exc_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_que_pet/boyce_buffer_que_pet_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_que_rob/boyce_buffer_que_rob_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_que_pyr/boyce_buffer_que_pyr_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_que_sub/boyce_buffer_que_sub_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_abi_alb/boyce_buffer_abi_alb_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_ace_pla/boyce_buffer_ace_pla_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_aln_glu/boyce_buffer_aln_glu_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_jun_oxy/boyce_buffer_jun_oxy_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_arb_une/boyce_buffer_arb_une_part_tot.png)
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_cra_mon/boyce_buffer_cra_mon_part_tot.png)
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_pru_spi/boyce_buffer_pru_spi_part_tot.png)
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_bux_sem/boyce_buffer_bux_sem_part_tot.png)
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_cot_tom/boyce_buffer_cot_tom_part_tot.png)
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_vio_mir/boyce_buffer_vio_mir_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_dip_eru/boyce_buffer_dip_eru_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_cen_alb/boyce_buffer_cen_alb_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_ger_luc/boyce_buffer_ger_luc_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_lin_alp/boyce_buffer_lin_alp_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_pis_ter/boyce_buffer_pis_ter_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_leo_com/boyce_buffer_leo_com_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180430/results_lot_edu/boyce_buffer_lot_edu_part_tot.png)
+
+
+
+#####pagebreak
+
+#Supplementary Material S`r t1 <- t1 + 1; t1`
+
+Figures S`r t1`.1 - S`r t1`.7: Evolution of Boyce Index Total (green) and Parcial (blue), and the execution time in minutes (pink), for all the species in Case Study 2
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/results_arb_une/boyce_bandwidth_arb_une_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/results_asp_aes/boyce_bandwidth_asp_aes_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/results_cha_hum/boyce_bandwidth_cha_hum_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/results_eph_fra/boyce_bandwidth_eph_fra_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/results_pis_len/boyce_bandwidth_pis_len_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/results_que_coc/boyce_bandwidth_que_coc_part_tot.png)
+
+![](/Users/xavi/Google Drive/MinBA/minba_20180825_balears/results_tax_bac/boyce_bandwidth_tax_bac_part_tot.png)
