@@ -31,10 +31,16 @@ library(latticeExtra)
 # My useful functions
 source("https://raw.githubusercontent.com/xavi-rp/xavi_functions/master/xavi_functions.r")
 # To download presences: https://www.researchgate.net/publication/326440673_PreSPickR_Downloading_Species_Presences_Occurrences_From_Public_Repositories
+library(devtools)
+install_github("xavi-rp/PreSPickR")
 library(PreSPickR)
 
 #### Settings ####
-wd <- "~/Google Drive/MinBA"
+if(Sys.info()[4] == "MacBook-Pro-de-Xavier.local") {
+  wd <- "~/Google Drive/MinBA"
+}else{
+  wd <- "C:\\Users\\rotllxa\\Desktop\\MinBA_2019"
+}
 setwd(wd)
 dir2save <- paste0(wd, "/minba_20180430")    # Europe, etc
 dir2save <- paste0(wd, "/minba_20180825_balears")    # Baelarics
@@ -45,6 +51,7 @@ if(!file.exists(dir2save)) dir.create(dir2save)
 # Need to download presence data from GBIF/Bioatles?
 # If != "no", provide a csv with the list of species called "species.csv"
 pres2bdwnld <- "no"
+pres2bdwnld <- "yes"
 data_rep <- "gbif"
 data_rep <- "bioatles"
 
