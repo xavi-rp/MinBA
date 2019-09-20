@@ -109,7 +109,7 @@ names(rnk_best_eur) <- gsub("andwidth", "uffer", names(rnk_best_eur))
 
 tb1 <- table_num(name = "t1", caption = "Best and second best buffer with and without taking into account execution time, for each species in Case 1")
 
-fig2 <- fig_num(name = "f2", caption = "Evolution of Boyce Index Total (green) and Parcial (blue) and the execution time in minutes (pink) for Fraxinus excelsior")
+
 
 fig3 <- fig_num(name = "f3", caption = "Evolution of Boyce Index Total (green) and Parcial (blue) and the execution time in minutes (pink) for Fagus sylvatica")
 
