@@ -2,13 +2,13 @@
 #
 # minba_00settings.r
 #
-# Created on: Winter 2018 (under construction)
+# Created on: Winter 2018
 #
 # Created by: Xavier Rotllan-Puig (xavi.rotllan.puig@gmail.com)
 #
 # Description: The aim of this script is to gather the settings to run minba.r
-# 
-# 
+#
+#
 # ------------------------------------------
 
 
@@ -36,7 +36,7 @@ install_github("xavi-rp/PreSPickR")
 library(PreSPickR)
 
 #### Settings ####
-if(Sys.info()[4] == "MacBook-Pro-de-Xavier.local") {
+if(Sys.info()[4] == "MacBook-MacBook-Pro-de-Xavier.local") {
   wd <- "~/Google Drive/MinBA"
 }else{
   wd <- "C:\\Users\\rotllxa\\Desktop\\MinBA_2019"
@@ -50,13 +50,15 @@ if(!file.exists(dir2save)) dir.create(dir2save)
 
 # Need to download presence data from GBIF/Bioatles?
 # If != "no", provide a csv with the list of species called "species.csv"
-pres2bdwnld <- "no"
 pres2bdwnld <- "yes"
-data_rep <- "gbif"
+pres2bdwnld <- "no"
 data_rep <- "bioatles"
+data_rep <- "gbif"
+data_rep <- "virtual_sp"
 
 # Resolution
 if (data_rep == "gbif") resol <- 5  # 5 arcmin ~ 4.5 km2
+if (data_rep == "virtual_sp") resol <- 5  # 5 arcmin ~ 4.5 km2
 if (data_rep == "bioatles") resol <- 0.5  # 30 arcsec ~ 1 km2
 
 # Need to download climatic data?

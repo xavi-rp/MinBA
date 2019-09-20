@@ -6,13 +6,14 @@
 ########                                                       ############
 ###########################################################################
 #
-# minba.r
+# minba_run.R
 #
 # Created on: Winter 2018 (under construction)
 #
 # Created by: Xavier Rotllan-Puig (xavi.rotllan.puig@gmail.com)
 #
-# Description: The aim of this script is 
+# Description: The aim of this script is to run the calculations for the 
+#              Case Study 1 (real species) of the paper
 # 
 # 
 # 
