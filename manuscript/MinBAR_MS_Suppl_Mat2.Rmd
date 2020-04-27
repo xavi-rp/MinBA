@@ -36,7 +36,7 @@ This is the Supplementary Material to the article “Determining the minimal bac
 #Supplementary Material S`r t1 <- t1 + 1; t1`
 
 ```{r echo=FALSE}
-info_mod_means <- read.csv(paste0("/Users/xavi_rp/Google Drive/MinBA", "/minba_20190622_maxnet/results_pru_spi/info_mod_means_pru_spi.csv"), header = TRUE)
+info_mod_means <- read.csv(paste0("/Users/xavi_rp/Documents/MinBA_models", "/minba_20190622_maxnet/results_pru_spi/info_mod_means_pru_spi.csv"), header = TRUE)
 names(info_mod_means) <- gsub("andwidth", "uffer", names(info_mod_means))
 
 pander(info_mod_means,
@@ -52,7 +52,7 @@ pander(info_mod_means,
 
 ```{r echo=FALSE}
 
-sp_list_1 <- read.csv("/Users/xavi_rp/Google Drive/MinBA/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 1:2]
+sp_list_1 <- read.csv("/Users/xavi_rp/Documents/MinBA_models/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 1:2]
 pander(sp_list_1,
        caption = paste0("Table S", t1, ".1: List of species used in case study 1"),
        justify = c('left'))
@@ -66,8 +66,8 @@ The occurrences were downloaded from GBIF using *PreSPickR* [@RN6687]
 
 ```{r cites, include = FALSE}
 #### GBIF Data sets citation ####
-#setwd("/Users/xavi_rp/Google Drive/MinBA/gbif_data")
-dcs <- list.files(path = "/Users/xavi_rp/Google Drive/MinBA/gbif_data", pattern = "*.RData$", full.names = TRUE)
+#setwd("/Users/xavi_rp/Documents/MinBA_models/gbif_data")
+dcs <- list.files(path = "/Users/xavi_rp/Google Drive/MinBA_OldVersions/gbif_data", pattern = "*.RData$", full.names = TRUE)
 lst_rfs <- as.data.frame(matrix(nrow = 0, ncol = 4))
 for (d in 1:length(dcs)){
   load(dcs[d], verbose = TRUE)
@@ -95,81 +95,57 @@ pander(lst_rfs,
 
 Figures S`r t1`.1 - S`r t1`.25: Evolution of Boyce Index Total (green) and Partial (blue), and the execution time in minutes (pink), for all the species in case study 1
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_pin_syl/boyce_buffer_pin_syl_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_pin_syl/boyce_buffer_pin_syl_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_que_ile/boyce_buffer_que_ile_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_ile/boyce_buffer_que_ile_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_fag_syl/boyce_buffer_fag_syl_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_fag_syl/boyce_buffer_fag_syl_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_fra_exc/boyce_buffer_fra_exc_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_fra_exc/boyce_buffer_fra_exc_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_que_pet/boyce_buffer_que_pet_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_pet/boyce_buffer_que_pet_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_que_rob/boyce_buffer_que_rob_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_rob/boyce_buffer_que_rob_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_que_pyr/boyce_buffer_que_pyr_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_pyr/boyce_buffer_que_pyr_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_que_sub/boyce_buffer_que_sub_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_sub/boyce_buffer_que_sub_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_abi_alb/boyce_buffer_abi_alb_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_abi_alb/boyce_buffer_abi_alb_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_ace_pla/boyce_buffer_ace_pla_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_ace_pla/boyce_buffer_ace_pla_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_aln_glu/boyce_buffer_aln_glu_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_aln_glu/boyce_buffer_aln_glu_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_jun_oxy/boyce_buffer_jun_oxy_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_jun_oxy/boyce_buffer_jun_oxy_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_arb_une/boyce_buffer_arb_une_part_tot.png)
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_cra_mon/boyce_buffer_cra_mon_part_tot.png)
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_pru_spi/boyce_buffer_pru_spi_part_tot.png)
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_bux_sem/boyce_buffer_bux_sem_part_tot.png)
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_cot_tom/boyce_buffer_cot_tom_part_tot.png)
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_vio_mir/boyce_buffer_vio_mir_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_arb_une/boyce_buffer_arb_une_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_cra_mon/boyce_buffer_cra_mon_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_pru_spi/boyce_buffer_pru_spi_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_bux_sem/boyce_buffer_bux_sem_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_cot_tom/boyce_buffer_cot_tom_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_vio_mir/boyce_buffer_vio_mir_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_dip_eru/boyce_buffer_dip_eru_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_dip_eru/boyce_buffer_dip_eru_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_cen_alb/boyce_buffer_cen_alb_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_cen_alb/boyce_buffer_cen_alb_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_ger_luc/boyce_buffer_ger_luc_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_ger_luc/boyce_buffer_ger_luc_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_lin_alp/boyce_buffer_lin_alp_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_lin_alp/boyce_buffer_lin_alp_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_pis_ter/boyce_buffer_pis_ter_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_pis_ter/boyce_buffer_pis_ter_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_leo_com/boyce_buffer_leo_com_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_leo_com/boyce_buffer_leo_com_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet/results_lot_edu/boyce_buffer_lot_edu_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_lot_edu/boyce_buffer_lot_edu_part_tot.png)
 
 
 #####pagebreak
 #Supplementary Material S`r t1 <- t1 + 1; t1`. Case Study 3: Real data on islands
 
 ```{r echo=FALSE}
-rnk_best_eur_1 <- read.csv("/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/rankingBestBuffer.csv", header = TRUE)
-names(rnk_best_eur_1) <- gsub("andwidth", "uffer", names(rnk_best_eur_1))
-
-prop_notime_bal <- nrow(rnk_best_eur_1[rnk_best_eur_1$Best_Buffer_NoTime != 10, ])/nrow(rnk_best_eur_1) * 100
-prop_time_bal <- nrow(rnk_best_eur_1[rnk_best_eur_1$Best_Buffer_WithTime != 10, ])/nrow(rnk_best_eur_1) * 100
-
-if(prop_notime_bal == prop_time_bal){
-  prop_bal <- paste0("(", prop_notime_bal, "%)")
-}else{
-  prop_bal <- paste0(", both taking into account the execution time (", prop_time_bal, "%) and not doing so (", prop_notime_bal, "%)")
-}
-```
-
-
-Besides case studies 1 and 2 presented on the main paper, and to assess *MinBAR* for species inhabiting on islands, we run this case study 3 with real data from the Balearic Islands (Western Mediterranean). 
-
-We modelled the distribution of `r nrow(rnk_best_eur_1)` species on the Balearic Islands (see the list in Table S`r t1`.1), although their native distribution also includes other continental areas. The occurrences were downloaded from Bioatles (http://bioatles.caib.es) using the R package *PreSPickR* [@RN6687]. The function *minba* was run with default parameters (10 buffers, 3 model replicates per buffer and completing the models for all of them). MaxEnt models were fit using *maxnet* [@RN2966] with the default parameters, except for the number of background points. We used 19 climatic variables available from WorldClim [@RN6688] at a resolution of 0.5 arc-minutes. 
-
-Both BI_tot and BI_part for most of the species did not improve very much when increasing the buffers after the first half. Table S`r t1`.2 and Figures S`r t1`.1 show that the best models for most of the species were those fit with only part of their distribution `r prop_bal`. The output graphs produced by *minba* can be seen in Figures S`r t1`.2 to S`r t1`.11. 
-
-These results confirm that *MinBAR* performs equally well for islands than for continental data. 
-
-
-```{r echo=FALSE}
-sp_list_2 <- read.csv("/Users/xavi_rp/Google Drive/MinBA/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 3:4]
+sp_list_2 <- read.csv("/Users/xavi_rp/Documents/MinBA_models/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 3:4]
 
 pander(sp_list_2,
        caption = paste0("Table S", t1, ".1: List of species used in case study 3 (Balearic Islands)"),
@@ -182,11 +158,12 @@ pander(sp_list_2,
 
 
 ```{r echo=FALSE}
-pander(rnk_best_eur_1,
-       caption = paste0("Table S", t1, ".2: Best and second best buffer with and without taking into account execution time, for each species in Case Study 3"),
+sp_list_2 <- read.csv("/Users/xavi_rp/Documents/MinBA_models/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 3:4]
+
+pander(sp_list_2,
+       caption = paste0("Table S", t1, ".1: List of species used in case study 3 (Balearic Islands)"),
        justify = c('left'))
 ```
-
 
 \newline 
 \newline 
@@ -196,31 +173,31 @@ pander(rnk_best_eur_1,
 
 Figures S`r t1`.1: Frequencies of best buffer with and without taking into account execution time in Case Study 3 (Balearic Islands)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/BestBuffers.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/BestBuffers.png)
 
 
 
 Figures S`r t1`.2 - S`r t1`.11: Evolution of Boyce Index Total (green) and Partial (blue), and the execution time in minutes (pink), for all the species in Case Study 3 (Balearic Islands)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_arb_une/boyce_buffer_arb_une_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_arb_une/boyce_buffer_arb_une_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_asp_aes/boyce_buffer_asp_aes_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_asp_aes/boyce_buffer_asp_aes_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_cha_hum/boyce_buffer_cha_hum_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_cha_hum/boyce_buffer_cha_hum_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_eph_fra/boyce_buffer_eph_fra_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_eph_fra/boyce_buffer_eph_fra_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_hel_sto/boyce_buffer_hel_sto_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_hel_sto/boyce_buffer_hel_sto_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_jun_oxy/boyce_buffer_jun_oxy_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_jun_oxy/boyce_buffer_jun_oxy_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_pis_len/boyce_buffer_pis_len_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_pis_len/boyce_buffer_pis_len_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_que_coc/boyce_buffer_que_coc_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_que_coc/boyce_buffer_que_coc_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_rha_ala/boyce_buffer_rha_ala_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_rha_ala/boyce_buffer_rha_ala_part_tot.png)
 
-![](/Users/xavi_rp/Google Drive/MinBA/minba_20190622_maxnet_balears/results_vib_tin/boyce_buffer_vib_tin_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_vib_tin/boyce_buffer_vib_tin_part_tot.png)
 
 
 
