@@ -8,18 +8,19 @@
 #
 # minba_run_new.R
 #
-# Created on: Winter 2018 - Summer 2019
+# Created: Winter 2018
+#
+# Updated: Spring 2020
 #
 # Created by: Xavier Rotllan-Puig (xavi.rotllan.puig@gmail.com)
 #
 # Description: The aim of this script is to run the calculations for the 
-#              Case Study 2 (virtual species) of the paper
+#              Case Studies of the paper
 #
 #
 
 
 # ------------------------------------------
-#source("~/Google Drive/MinBA/minba_run.r")
 
 #### Call settings ####
 if(Sys.info()[4] == "MacBook-MacBook-Pro-de-Xavier.local") {
@@ -31,7 +32,7 @@ if(Sys.info()[4] == "MacBook-MacBook-Pro-de-Xavier.local") {
 #### Downloading Presence Records ####
 if(tolower(pres2bdwnld) != "no"){
   if (data_rep == "gbif")  PreSPickR:::GetBIF(credentials = "gbif_credentials.RData", sp_list = "species_gbif.csv", out_name = "sp_records_gbif")
-  if (data_rep == "virtual_sp")  #source("MinBA_VirtualSp.R")
+  if (data_rep == "virtual_sp")  #source("MinBA_VirtualSp_iber.R")
   if (data_rep == "bioatles")  PreSPickR:::bioatles(sp_list = "species_bioatles.csv", out_name = "sp_records_bioatles")
 }
 
@@ -65,16 +66,10 @@ if(tolower(mskng) != "no"){
 
 library(devtools)
 install_github("xavi-rp/MinBAR")
-#install.packages(c("Hmisc", "rms"))
 library(MinBAR)
 #??MinBAR
 
-#setwd("C:/Users/rotllxa/Desktop/MinBA_2019")
-#MinBAR:::minba(occ = paste0(wd, "/sp_records_bioatles.csv"),
-#               varbles = paste0(wd, "/wc0.5"),
-#               prj = "4326", num_bands = 10,
-#               n_rep = 3, BI_part = NULL, BI_tot = NULL, SD_BI_part = NULL,
-#               SD_BI_tot = NULL)
+
 if (data_rep == "bioatles"){
   occurrences <- read.csv(paste0(wd, "/sp_records_bioatles.csv"), header = TRUE)
   varbles <- paste0(wd, "/wc0.5")
@@ -115,16 +110,8 @@ if (data_rep == "bioatles"){
 #load(paste0(wd, "/wc5_other/biovars_eur.RData"), verbose = T)
 #load(paste0(wd, "/wc0.5/wc05.RData"), verbose = T)
 
-nrow(occurrences)
-unique(occurrences$species)
 
-#occurrences <- occurrences[occurrences$species == "Pinus sylvestris", ]
-
-#MinBAR:::minba(occ = occurrences,
-minba(occ = occurrences,
-               #varbles = paste0(wd, "/wc5_other/biovars_eur"),
-               #varbles = biovars_eur,
-               #varbles = bioclim,
+MinBAR:::minba(occ = occurrences,
                varbles = varbles,
                wd = wd,
                prj = 4326,
@@ -132,9 +119,6 @@ minba(occ = occurrences,
                maxent_tool = "maxnet")
                #maxent_tool = "dismo")
 
-
-
-#
 
 
 #### Frequences of Best Buffer ####
@@ -284,7 +268,7 @@ write.csv(summ_overlap, file = paste0(dir2save, "/comp_BestModl_VirtSp_MeanSD.cs
 
 
 #### GBIF Data sets citation ####
-setwd("/Users/xavi_rp/Google Drive/MinBA/gbif_data")
+setwd("/Users/xavi_rp/Google Drive/MinBA_OldVersions/gbif_data")
 
 dcs <- list.files(path = "/Users/xavi_rp/Google Drive/MinBA/gbif_data", pattern = "*.RData$", full.names = TRUE)
 dcs
@@ -308,10 +292,3 @@ lst_rfs
 write.csv(lst_rfs, "citation_data.csv", row.names = FALSE)
 
 
-
-
-devtools::install_github("metacran/cranlogs")
-library(cranlogs)
-?cran_downloads
-cran_downloads(when = "last-month", packages = c("MinBAR"))
-sum(cran_downloads(from = "2019-01-01", to = Sys.Date(), packages = c("MinBAR"))$count)

@@ -2,11 +2,13 @@
 #
 # minba_00settings.r
 #
-# Created on: Winter 2018
+# Created: Winter 2018
+#
+# Updated: Spring 2020
 #
 # Created by: Xavier Rotllan-Puig (xavi.rotllan.puig@gmail.com)
 #
-# Description: The aim of this script is to gather the settings to run minba.r
+# Description: The aim of this script is to gather the settings to run 'minba_run_new.r'
 #
 #
 # ------------------------------------------
