@@ -37,14 +37,15 @@ library(PreSPickR)
 
 #### Settings ####
 if(Sys.info()[4] == "MacBook-MacBook-Pro-de-Xavier.local") {
-  wd <- "~/Google Drive/MinBA"
+  wd <- "~/Documents/MinBA_models/"
 }else{
   wd <- "C:\\Users\\rotllxa\\Desktop\\MinBA_2019"
 }
 setwd(wd)
-dir2save <- paste0(wd, "/minba_20180430")    # Europe, etc
-dir2save <- paste0(wd, "/minba_20180825_balears")    # Baelarics
-dir2save <- paste0(wd, "/minba_", format(Sys.Date(), format="%Y%m%d"))
+#dir2save <- paste0(wd, "/minba_20190622_maxnet")             # Europe, etc
+#dir2save <- paste0(wd, "/minba_20190622_maxnet_balears")     # Baelarics
+dir2save <- paste0(wd, "/minba_20190910")                    # virtualspecies
+#dir2save <- paste0(wd, "/minba_", format(Sys.Date(), format="%Y%m%d"))
 if(!file.exists(dir2save)) dir.create(dir2save)
 
 

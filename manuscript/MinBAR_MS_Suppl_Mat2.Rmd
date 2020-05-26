@@ -1,11 +1,31 @@
 ---
 title: "DETERMINING THE MINIMAL BACKGROUND AREA FOR SPECIES DISTRIBUTION MODELS: MinBAR PACKAGE. SUPPLEMENTARY MATERIAL"
-author: "Xavier Rotllan-Puig1,* & Anna Traveset2"
+author:
+  - Xavier Rotllan-Puig:
+      email: xavier.rotllan.puig@aster-projects.cat
+      institute: [aster]
+      correspondence: true
+  - Anna Traveset:
+      institute: [imedea]
+ 
+institute:
+  - aster: ASTER Projects. Barri Reboll, 9, 1r. 08694 - Guardiola de Berguedà (Barcelona). Spain
+  - imedea: Terrestrial Ecology Laboratory. Global Change Research Group. Institut Mediterrani d’Estudis Avançats (CSIC-UIB). C/ Miquel Marqués, 21. 07190 - Esporles (Mallorca - Illes Balears). Spain
+
 date: ""
+
 output: 
   word_document:
-    reference_docx: MinBA_MS_styles.docx
+        reference_docx: MinBA_MS_styles.docx
+        toc_depth: 3  #up to three depths of headings (specified by #, ## and ###)
+        pandoc_args:
+          - --lua-filter=scholar-metadata.lua
+          - --lua-filter=author-info-blocks.lua
+
 bibliography: exportlist_1.bib
+#csl: methods-in-ecology-and-evolution.csl
+csl: ecological-modelling.csl
+
 ---
 
 ```{r setup, include = FALSE, results='asis'}

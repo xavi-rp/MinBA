@@ -23,12 +23,10 @@
 
 #### Call settings ####
 if(Sys.info()[4] == "MacBook-MacBook-Pro-de-Xavier.local") {
-  source("~/Google Drive/MinBA/minba_00settings.r")
+  source("~/Documents/MinBA_github/minba_00settings.r")
 }else{
   source("C:\\Users\\rotllxa\\Desktop\\MinBA_2019/minba_00settings.r")
 }
-#dir2save <- paste0(wd, "/minba_20180430")    # Europe, etc
-#dir2save <- paste0(wd, "/minba_20180506")    # Baelarics
 
 #### Downloading Presence Records ####
 if(tolower(pres2bdwnld) != "no"){
@@ -157,25 +155,33 @@ perc <- paste0(c(perc1, perc2), "%")
 maxY <- max(frec_best_NoTime$Freq, frec_best_WithTime$Freq) + 1
 posX <- c(1:num_bands, (num_bands + 2):((2 * (num_bands)) + 1)) - 0.3
 posY <- (maxY / 10 * 0.2) + c(frec_best$Frec_Best_NoTime, frec_best$Frec_Best_WithTime)
-if (maxY <= 5) legY <- -0.4 else legY <- -1.5
+if (maxY <= 5) legY <- -0.6 else legY <- -2.5  #legY <- -1.5
+if (maxY <= 5) posY1 <- -0.4 else posY1 <- -1.7  
+if (maxY > 5 & maxY <= 9) legY <- - 1.5 
+if (maxY > 5 & maxY <= 9) posY1 <- - 1
 
 palte <- colorRampPalette(colors = c("darkgreen", "green", "yellow", "orange", "red", "darkred"))(num_bands)
 
 #pdf(paste0(dir2save, "/BestBuffers.pdf"))
 png(paste0(dir2save, "/BestBuffers.png"))
-par(xpd = TRUE, mar = par()$mar + c(3.5,1,0,0))
-bpl <- barplot(as.matrix(frec_best[,c(2:3)]),
-               main = "Best Buffer With and Without Execution Time", ylab = paste0("Frequencies (n = ", nrow(best2_bnd_2exp), ")"),
+par(xpd = TRUE, mar = par()$mar + c(3.7, 1, 0, 0))
+bpl <- barplot(as.matrix(frec_best[, c(2:3)]),
+               main = "Best Buffer With and Without Execution Time", 
+               ylab = paste0("Frequencies (n = ", nrow(best2_bnd_2exp), ")"),
                ylim = c(0, maxY),
                beside = TRUE, space = c(0, 1),
                col = palte,
-               #names.arg = c(1:10, 1:10),
-               names.arg = c("Without Execution Time", "With Execution Time"),
-               cex.names = 1, las = 1)
+               names.arg = c(1:10, 1:10),
+               #names.arg = c("Without Execution Time", "With Execution Time"),
+               #cex.names = 1, las = 1)
+               cex.names = 0.8, las = 1)
 lg <- legend((num_bands/2), legY,
              legend = frec_best$BufferNum,
              fill = palte,
-             title = "Buffer Number", cex = 1, ncol = (num_bands/2))
+             title = "Buffer Number", cex = 1, 
+             ncol = (num_bands/2))
+txt1 <- text(x = 6, y = posY1, "Without Execution Time", cex = 1.3)
+txt1 <- text(x = 17, y = posY1, "With Execution Time", cex = 1.3)
 txt <- text(x = posX, y = posY, perc, cex = 0.8, pos = 4, srt = 45)
 
 dev.off()
