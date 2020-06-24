@@ -44,10 +44,21 @@ if(Sys.info()[4] == "MacBook-MacBook-Pro-de-Xavier.local") {
   wd <- "C:\\Users\\rotllxa\\Desktop\\MinBA_2019"
 }
 setwd(wd)
-#dir2save <- paste0(wd, "/minba_20190622_maxnet")             # Europe, etc
-#dir2save <- paste0(wd, "/minba_20190622_maxnet_balears")     # Baelarics
-dir2save <- paste0(wd, "/minba_20190910")                    # virtualspecies
-#dir2save <- paste0(wd, "/minba_", format(Sys.Date(), format="%Y%m%d"))
+
+#case2run <- "Europe"
+#case2run <- "VirtualSpecies"
+case2run <- "Balearics"
+
+if (case2run == "Europe"){
+  dir2save <- paste0(wd, "/minba_20190622_maxnet")   
+}else if (case2run == "Balearics"){
+  dir2save <- paste0(wd, "/minba_20190622_maxnet_balears")     
+}else if (case2run == "VirtualSpecies"){
+  dir2save <- paste0(wd, "/minba_20190910")              
+}else{
+  dir2save <- paste0(wd, "/minba_", format(Sys.Date(), format="%Y%m%d"))
+}
+
 if(!file.exists(dir2save)) dir.create(dir2save)
 
 
@@ -55,14 +66,17 @@ if(!file.exists(dir2save)) dir.create(dir2save)
 # If != "no", provide a csv with the list of species called "species.csv"
 pres2bdwnld <- "yes"
 pres2bdwnld <- "no"
-data_rep <- "bioatles"
-data_rep <- "gbif"
-data_rep <- "virtual_sp"
+
+if (case2run == "Europe") data_rep <- "gbif"
+if (case2run == "Balearics") data_rep <- "bioatles"
+if (case2run == "VirtualSpecies") data_rep <- "virtual_sp"
+
 
 # Resolution
 if (data_rep == "gbif") resol <- 5  # 5 arcmin ~ 4.5 km2
 if (data_rep == "virtual_sp") resol <- 5  # 5 arcmin ~ 4.5 km2
 if (data_rep == "bioatles") resol <- 0.5  # 30 arcsec ~ 1 km2
+
 
 # Need to download climatic data?
 clim2bdwnld <- "no"
@@ -75,7 +89,7 @@ num_bands <- 10
 n_times <- 3
 
 # Conditions to stop the modelling proces
-#   If the three are NULL, all buffers are preocessed
+#   If all the three are NULL, all buffers are preocessed
 #   If one or the two BIs have a value, this or these are the minimum limit to be reached
 #   If SD_BI, this or these are the minimum limit to be reached
 

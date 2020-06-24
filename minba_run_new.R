@@ -17,9 +17,6 @@
 # Description: The aim of this script is to run the calculations for the 
 #              Case Studies of the paper
 #
-#
-
-
 # ------------------------------------------
 
 #### Call settings ####
@@ -32,7 +29,7 @@ if(Sys.info()[4] == "MacBook-MacBook-Pro-de-Xavier.local") {
 #### Downloading Presence Records ####
 if(tolower(pres2bdwnld) != "no"){
   if (data_rep == "gbif")  PreSPickR:::GetBIF(credentials = "gbif_credentials.RData", sp_list = "species_gbif.csv", out_name = "sp_records_gbif")
-  if (data_rep == "virtual_sp")  #source("MinBA_VirtualSp_iber.R")
+  if (data_rep == "virtual_sp")  source("MinBA_VirtualSp_iber.R")
   if (data_rep == "bioatles")  PreSPickR:::bioatles(sp_list = "species_bioatles.csv", out_name = "sp_records_bioatles")
 }
 
@@ -50,9 +47,11 @@ if(tolower(clim2bdwnld) != "no"){
     save(bioclim, file = "wc0.5/wc05.RData")
     rm(bioclim_16) ; gc()
   }
+  
+}else{
+  if (data_rep == "gbif")  load(paste0(wd, "/wc5/wc5.RData"), verbose = FALSE)
+  if (data_rep == "bioatles")  load(paste0(wd, "/wc0.5/wc05.RData"), verbose = FALSE)
 }
-#if (data_rep == "gbif")  load(paste0(wd, "/wc5/wc5.RData"), verbose = FALSE)
-#if (data_rep == "bioatles")  load(paste0(wd, "/wc0.5/wc05.RData"), verbose = FALSE)
 
 
 #Making a mask (if necessary)
@@ -62,8 +61,8 @@ if(tolower(mskng) != "no"){
   msk <- reclassify(msk, c(0, msk@data@max, 1)) # reclassify to 1
   }
 
-#### Modelling species ####
 
+#### Modelling species ####
 library(devtools)
 install_github("xavi-rp/MinBAR")
 library(MinBAR)
@@ -81,10 +80,7 @@ if (data_rep == "bioatles"){
   #varbles <- paste0(wd, "/wc5_other/biovars_eur")
   #varbles <- paste0("~/Documents/MinBA_models/", "wc5_other/biovars_eur")
   
-  unique(virtSp_occurrences_good$species)
   virtSp_occurrences <- virtSp_occurrences_good
-  head(virtSp_occurrences)
-  unique(virtSp_occurrences$species)
   #virtSp_occurrences$species <- gsub("virtSp_narrow_", "", virtSp_occurrences$species)
   #virtSp_occurrences$species <- gsub("_alpha-001_", " ", virtSp_occurrences$species)
   #virtSp_occurrences$species <- gsub("_alpha-005_", " ", virtSp_occurrences$species)
