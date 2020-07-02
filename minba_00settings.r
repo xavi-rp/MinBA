@@ -45,9 +45,9 @@ if(Sys.info()[4] == "MacBook-MacBook-Pro-de-Xavier.local") {
 }
 setwd(wd)
 
-#case2run <- "Europe"
+case2run <- "Europe"
 #case2run <- "VirtualSpecies"
-case2run <- "Balearics"
+#case2run <- "Balearics"
 
 if (case2run == "Europe"){
   dir2save <- paste0(wd, "/minba_20190622_maxnet")   
@@ -89,7 +89,7 @@ num_bands <- 10
 n_times <- 3
 
 # Conditions to stop the modelling proces
-#   If all the three are NULL, all buffers are preocessed
+#   If all the four are NULL, all buffers are preocessed
 #   If one or the two BIs have a value, this or these are the minimum limit to be reached
 #   If SD_BI, this or these are the minimum limit to be reached
 

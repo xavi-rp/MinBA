@@ -39,21 +39,14 @@ t1 <- 0
 ```
 
 
-^1^ASTER Projects. Barri Reboll, 9, 1r. 08694 - Guardiola de Berguedà (Barcelona). Spain
 
-^2^Terrestrial Ecology Laboratory. Global Change Research Group. Institut Mediterrani d’Estudis Avançats (CSIC-UIB). C/ Miquel Marqués, 21. 07190 - Esporles (Mallorca - Illes Balears). Spain
-
-*Correspondence: Xavier Rotllan-Puig <xavier.rotllan.puig@aster-projects.cat>
-
-
-
-#Introduction
+# Introduction
 
 This is the Supplementary Material to the article “Determining the minimal background area for MaxEnt species distribution models: MinBAR package” (https://github.com/xavi_rp-rp/MinBAR) `r #, published as a pre-print in BioRxiv with the DOI: `
 
-#####pagebreak
+##### pagebreak
 
-#Supplementary Material S`r t1 <- t1 + 1; t1`
+# Supplementary Material S`r t1 <- t1 + 1; t1`
 
 ```{r echo=FALSE}
 info_mod_means <- read.csv(paste0("/Users/xavi_rp/Documents/MinBA_models", "/minba_20190622_maxnet/results_pru_spi/info_mod_means_pru_spi.csv"), header = TRUE)
@@ -68,7 +61,7 @@ pander(info_mod_means,
 \newline 
 
 
-#Supplementary Material S`r t1 <- t1 + 1; t1`
+# Supplementary Material S`r t1 <- t1 + 1; t1`
 
 ```{r echo=FALSE}
 
@@ -110,8 +103,9 @@ pander(lst_rfs,
 
 
 
-#####pagebreak
-#Supplementary Material S`r t1 <- t1 + 1; t1`
+##### pagebreak
+
+# Supplementary Material S`r t1 <- t1 + 1; t1`
 
 Figures S`r t1`.1 - S`r t1`.25: Evolution of Boyce Index Total (green) and Partial (blue), and the execution time in minutes (pink), for all the species in case study 1
 
@@ -161,8 +155,9 @@ Figures S`r t1`.1 - S`r t1`.25: Evolution of Boyce Index Total (green) and Parti
 ![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_lot_edu/boyce_buffer_lot_edu_part_tot.png)
 
 
-#####pagebreak
-#Supplementary Material S`r t1 <- t1 + 1; t1`. Case Study 3: Real data on islands
+##### pagebreak
+
+# Supplementary Material S`r t1 <- t1 + 1; t1`
 
 ```{r echo=FALSE}
 sp_list_2 <- read.csv("/Users/xavi_rp/Documents/MinBA_models/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 3:4]
@@ -177,21 +172,8 @@ pander(sp_list_2,
 \newline 
 
 
-```{r echo=FALSE}
-sp_list_2 <- read.csv("/Users/xavi_rp/Documents/MinBA_models/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 3:4]
 
-pander(sp_list_2,
-       caption = paste0("Table S", t1, ".1: List of species used in case study 3 (Balearic Islands)"),
-       justify = c('left'))
-```
-
-\newline 
-\newline 
-\newline 
-
-
-
-Figures S`r t1`.1: Frequencies of best buffer with and without taking into account execution time in Case Study 3 (Balearic Islands)
+Figure S`r t1`.1: Frequencies of best buffer with and without taking into account execution time in Case Study 3 (Balearic Islands)
 
 ![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/BestBuffers.png)
 
@@ -222,9 +204,9 @@ Figures S`r t1`.2 - S`r t1`.11: Evolution of Boyce Index Total (green) and Parti
 
 
 
-#####pagebreak
+##### pagebreak
 
-#References
+# References
 
 
 
