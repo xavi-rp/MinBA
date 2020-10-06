@@ -107,7 +107,7 @@ pander(lst_rfs,
 
 # Supplementary Material S`r t1 <- t1 + 1; t1`
 
-Figures S`r t1`.1 - S`r t1`.25: Evolution of Boyce Index Total (green) and Partial (blue), and the execution time in minutes (pink), for all the species in case study 1
+Figures S`r t1`.1 - S`r t1`.25: Evolution of Boyce Index Total (green) and Partial (blue), and the execution time in minutes (pink), for all the species in case study 1. The origin of the x-axis corresponds to the geographical centre of the species distribution (mean location for longitude/latitude coordinates dealing with angularity). The x-axis increases (in kilometers) with buffers 1 to 10, respectively the closest and the most distant to the centre of species distribution
 
 ![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_pin_syl/boyce_buffer_pin_syl_part_tot.png)
 
@@ -179,7 +179,7 @@ Figure S`r t1`.1: Frequencies of best buffer with and without taking into accoun
 
 
 
-Figures S`r t1`.2 - S`r t1`.11: Evolution of Boyce Index Total (green) and Partial (blue), and the execution time in minutes (pink), for all the species in Case Study 3 (Balearic Islands)
+Figures S`r t1`.2 - S`r t1`.11: Evolution of Boyce Index Total (green) and Partial (blue), and the execution time in minutes (pink), for all the species in Case Study 3 (Balearic Islands). The origin of the x-axis corresponds to the geographical centre of the species distribution (mean location for longitude/latitude coordinates dealing with angularity). The x-axis increases (in kilometers) with buffers 1 to 10, respectively the closest and the most distant to the centre of species distribution
 
 ![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_arb_une/boyce_buffer_arb_une_part_tot.png)
 
