@@ -1,0 +1,216 @@
+---
+title: "DETERMINING THE MINIMAL BACKGROUND AREA FOR SPECIES DISTRIBUTION MODELS: MinBAR PACKAGE. SUPPLEMENTARY MATERIAL"
+author:
+  - Xavier Rotllan-Puig:
+      email: xavier.rotllan.puig@aster-projects.cat
+      institute: [aster]
+      correspondence: true
+  - Anna Traveset:
+      institute: [imedea]
+ 
+institute:
+  - aster: ASTER Projects. Barri Reboll, 9, 1r. 08694 - Guardiola de Berguedà (Barcelona). Spain
+  - imedea: Terrestrial Ecology Laboratory. Global Change Research Group. Institut Mediterrani d’Estudis Avançats (CSIC-UIB). C/ Miquel Marqués, 21. 07190 - Esporles (Mallorca - Illes Balears). Spain
+
+date: ""
+
+output: 
+  word_document:
+        reference_docx: MinBA_MS_styles.docx
+        toc_depth: 3  #up to three depths of headings (specified by #, ## and ###)
+        pandoc_args:
+          - --lua-filter=scholar-metadata.lua
+          - --lua-filter=author-info-blocks.lua
+
+bibliography: exportlist_1.bib
+#csl: methods-in-ecology-and-evolution.csl
+csl: ecological-modelling.csl
+
+---
+
+```{r setup, include = FALSE, results='asis'}
+library(knitr)
+library(pander)
+library(captioner)
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r echo=FALSE}
+t1 <- 0
+```
+
+
+
+# Introduction
+
+This is the Supplementary Material to the article “Determining the minimal background area for MaxEnt species distribution models: MinBAR package” (https://CRAN.R-project.org/package=MinBAR) `r #, published as a pre-print in BioRxiv with the DOI: `
+
+##### pagebreak
+
+# Supplementary Material S`r t1 <- t1 + 1; t1`
+
+```{r echo=FALSE}
+info_mod_means <- read.csv(paste0("/Users/xavi_rp/Documents/MinBA_models", "/minba_20190622_maxnet/results_pru_spi/info_mod_means_pru_spi.csv"), header = TRUE)
+names(info_mod_means) <- gsub("andwidth", "uffer", names(info_mod_means))
+
+pander(info_mod_means,
+       caption = paste0("Table S", t1, ": Example of an output of MinBAR. Buffer in km."),
+       justify = c('center'), split.cells = c(10, 8, rep(10, 10)))
+```
+
+\newline 
+\newline 
+
+
+# Supplementary Material S`r t1 <- t1 + 1; t1`
+
+```{r echo=FALSE}
+
+sp_list_1 <- read.csv("/Users/xavi_rp/Documents/MinBA_models/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 1:2]
+pander(sp_list_1,
+       caption = paste0("Table S", t1, ".1: List of species used in case study 1"),
+       justify = c('left'))
+```
+
+The occurrences were downloaded from GBIF using *PreSPickR* [@RN6687]
+
+\newline 
+\newline 
+\newline 
+
+```{r cites, include = FALSE}
+#### GBIF Data sets citation ####
+#setwd("/Users/xavi_rp/Documents/MinBA_models/gbif_data")
+dcs <- list.files(path = "/Users/xavi_rp/Google Drive/MinBA_OldVersions/gbif_data", pattern = "*.RData$", full.names = TRUE)
+lst_rfs <- as.data.frame(matrix(nrow = 0, ncol = 4))
+for (d in 1:length(dcs)){
+  load(dcs[d], verbose = TRUE)
+  if (d == 7){
+    d3 <- toupper("Cotoneaster tomentosus Lindl.")
+  }else{
+    d3 <- rqst_02_meta$request$predicate$predicates[[1]]$value
+  }
+  d1 <- c(d3, "GBIF", rqst_02_meta$doi, rqst_02_meta$modified)
+  lst_rfs[d,] <- d1
+}
+names(lst_rfs) <- c("species", "source", "DOI", "date_downloaded")
+```
+
+```{r echo=FALSE}
+pander(lst_rfs, 
+       caption = paste0("Table S", t1, ".2: Citations of the data sets downloaded from GBIF and used in case study 1"),
+       split.cells = c(7, 12, 12, 12, 12))
+```
+
+
+
+##### pagebreak
+
+# Supplementary Material S`r t1 <- t1 + 1; t1`
+
+Figures S`r t1`.1 - S`r t1`.25: Evolution of Boyce Index Total (green) and Partial (blue), and the execution time in minutes (pink), for all the species in case study 1. The origin of the x-axis corresponds to the geographical centre of the species distribution (mean location for longitude/latitude coordinates dealing with angularity). The x-axis increases (in kilometres) with buffers 1 to 10, respectively the closest and the most distant to the centre of species distribution
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_pin_syl/boyce_buffer_pin_syl_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_ile/boyce_buffer_que_ile_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_fag_syl/boyce_buffer_fag_syl_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_fra_exc/boyce_buffer_fra_exc_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_pet/boyce_buffer_que_pet_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_rob/boyce_buffer_que_rob_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_pyr/boyce_buffer_que_pyr_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_que_sub/boyce_buffer_que_sub_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_abi_alb/boyce_buffer_abi_alb_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_ace_pla/boyce_buffer_ace_pla_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_aln_glu/boyce_buffer_aln_glu_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_jun_oxy/boyce_buffer_jun_oxy_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_arb_une/boyce_buffer_arb_une_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_cra_mon/boyce_buffer_cra_mon_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_pru_spi/boyce_buffer_pru_spi_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_bux_sem/boyce_buffer_bux_sem_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_cot_tom/boyce_buffer_cot_tom_part_tot.png)
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_vio_mir/boyce_buffer_vio_mir_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_dip_eru/boyce_buffer_dip_eru_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_cen_alb/boyce_buffer_cen_alb_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_ger_luc/boyce_buffer_ger_luc_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_lin_alp/boyce_buffer_lin_alp_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_pis_ter/boyce_buffer_pis_ter_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_leo_com/boyce_buffer_leo_com_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet/results_lot_edu/boyce_buffer_lot_edu_part_tot.png)
+
+
+##### pagebreak
+
+# Supplementary Material S`r t1 <- t1 + 1; t1`
+
+```{r echo=FALSE}
+sp_list_2 <- read.csv("/Users/xavi_rp/Documents/MinBA_models/Supl_Mat_Specs.csv", header = TRUE, sep = ";")[, 3:4]
+
+pander(sp_list_2,
+       caption = paste0("Table S", t1, ".1: List of species used in case study 3 (Balearic Islands)"),
+       justify = c('left'))
+```
+
+\newline 
+\newline 
+\newline 
+
+
+
+Figure S`r t1`.1: Frequencies of best buffer with and without taking into account execution time in Case Study 3 (Balearic Islands)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/BestBuffers.png)
+
+
+
+Figures S`r t1`.2 - S`r t1`.11: Evolution of Boyce Index Total (green) and Partial (blue), and the execution time in minutes (pink), for all the species in Case Study 3 (Balearic Islands). The origin of the x-axis corresponds to the geographical centre of the species distribution (mean location for longitude/latitude coordinates dealing with angularity). The x-axis increases (in kilometres) with buffers 1 to 10, respectively the closest and the most distant to the centre of species distribution
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_arb_une/boyce_buffer_arb_une_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_asp_aes/boyce_buffer_asp_aes_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_cha_hum/boyce_buffer_cha_hum_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_eph_fra/boyce_buffer_eph_fra_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_hel_sto/boyce_buffer_hel_sto_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_jun_oxy/boyce_buffer_jun_oxy_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_pis_len/boyce_buffer_pis_len_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_que_coc/boyce_buffer_que_coc_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_rha_ala/boyce_buffer_rha_ala_part_tot.png)
+
+![](/Users/xavi_rp/Documents/MinBA_models/minba_20190622_maxnet_balears/results_vib_tin/boyce_buffer_vib_tin_part_tot.png)
+
+
+
+
+##### pagebreak
+
+# References
+
+
+
+
+
+
+

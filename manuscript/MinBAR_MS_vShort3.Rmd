@@ -43,7 +43,7 @@ ts <- 0
 ```
 
 
-**Key-words**: background area, ecological niche model, extent, geographical background,  MaxEnt, species distribution model, transferability
+**Key-words**: background area, calibration area, ecological niche model, MaxEnt, species distribution model
 
 
 # Abstract
@@ -126,7 +126,7 @@ Finally, *minba* draws scatterplots of the two BI to show the evolution of them 
 
 To test the hypothesis on the existence of an optimal background area, we performed a case study with real data at ecozone level. Then, to check how effective is the best buffer identified by *minba* in capturing the real distribution of the species, we performed a second case study with simulation data at regional level. Finally, a third case study was run on data belonging to an archipelago in order to check the functionality on islands.  
 
-By default, the function *minba* defines 10 buffers, with 3 model replicates per buffer, and lets the process produce models for all of them. MaxEnt was run using *maxnet* with default parameters, except for the number of background points. The intention of that was to limit interferences in the results as much as possible for all the species. We used 19 climatic variables available from WorldClim [@RN6688] and, although MinBAR is scale-independent, it was tested with two different resolutions depending on the study case.
+By default, the function *minba* defines 10 buffers, with 15 model replicates per buffer, and lets the process produce models for all of them. MaxEnt was run using *maxnet* with default parameters, except for the number of background points. The intention of that was to limit interferences in the results as much as possible for all the species. We used 19 climatic variables available from WorldClim [@RN6688] and, although MinBAR is scale-independent, it was tested with two different resolutions depending on the study case.
 
 All the R scripts used in these case studies can be found at https://github.com/xavi-rp/MinBA. While *MinBAR* v.1.1.2 can be downloaded from CRAN at https://CRAN.R-project.org/package=MinBAR. The latest (unstable) version is available at https://github.com/xavi-rp/MinBAR.
 
@@ -144,7 +144,7 @@ tb1 <- table_num(name = "t1", caption = "Best and second best buffer with and wi
 
 fig30 <- fig_num(name = "f30", caption = "Occurrences of Fagus sylvatica. Black cross represents the geographical centre of the species distribution. Crosses in different colours for each buffer")
 
-fig3 <- fig_num(name = "f3", caption = "Evolution of Boyce Index Total (green) and Partial (blue) and the execution time in minutes (pink) for Fagus sylvatica. The origin of the x-axis corresponds to the geographical centre of the species distribution (mean location for longitude/latitude coordinates dealing with angularity). The x-axis increases (in kilometers) with buffers 1 to 10, respectively the closest and the most distant to the centre of species distribution")
+fig3 <- fig_num(name = "f3", caption = "Evolution of Boyce Index Total (green) and Partial (blue) and the execution time in minutes (pink) for Fagus sylvatica. The origin of the x-axis corresponds to the geographical centre of the species distribution (mean location for longitude/latitude coordinates dealing with angularity). The x-axis increases (in kilometres) with buffers 1 to 10, respectively the closest and the most distant to the centre of species distribution")
 
 fig1 <- fig_num(name = "f1", caption = "Frequencies of best buffer with and without taking into account execution time in Case 1. Buffers range from 1 to 10, corresponding respectively to the closest and the most distant to the centre of species distributions")
 
